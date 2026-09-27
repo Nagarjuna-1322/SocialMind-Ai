@@ -74,6 +74,44 @@ function getHindsight() {
   return hindsightClient;
 }
 
+export async function hindsightHealth() {
+  const memory = getHindsight();
+  if (!memory) {
+    return { connected: false, bankId: hindsightBankId, message: "Hindsight API key or base URL is not configured." };
+  }
+  try {
+    // A bank profile read is an authenticated, bank-specific round trip. It
+    // verifies both the API key and the configured bank ID without writing data.
+    await memory.getBankProfile(hindsightBankId);
+    return { connected: true, bankId: hindsightBankId, message: "Hindsight connection successful" };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Hindsight connection failed";
+    return { connected: false, bankId: hindsightBankId, message: `Hindsight unavailable: ${message}` };
+  }
+}
+
+async function verifyHindsightBank() {
+  const memory = getHindsight();
+  if (!memory) return null;
+  try {
+    await memory.getBankProfile(hindsightBankId);
+    return memory;
+  } catch {
+    try {
+      await memory.createBank(hindsightBankId, {
+        name: "SocialMind demo",
+        reflectMission: "Help TechNova decide what to publish next using remembered content outcomes and audience preferences.",
+        retainMission: "Retain concrete social post metrics, audience responses, brand preferences, and source post IDs.",
+        enableObservations: true,
+      });
+      return memory;
+    } catch (error) {
+      console.warn("[Hindsight] bank verification failed", error instanceof Error ? error.message : "unknown error");
+      return null;
+    }
+  }
+}
+
 function parseJsonList(value: string | null | undefined, fallbackValue: string[]) {
   try {
     const parsed = JSON.parse(value || "null");
@@ -253,7 +291,7 @@ export async function updateBrand(input: BrandProfile) {
       saved = { ...input, id: Number(result[0]?.insertId || 1) };
     }
   }
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   if (!memory) {
     await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Brand profile ${saved.name} was saved, but Hindsight is not configured.` });
   } else {
@@ -313,7 +351,7 @@ export async function seedDemoData() {
       })));
     }
   }
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   if (!memory) {
     await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Loaded ${seedPosts.length} historical posts into the database; Hindsight is not configured.` });
     return { created: seedPosts.length, retained: false, memoryStatus: "unavailable" as const };
@@ -418,7 +456,7 @@ function extractPostIds(text: string) {
 }
 
 async function recallMemory(query: string): Promise<{ status: "connected" | "unavailable" | "error"; items: MemoryItem[]; text?: string }> {
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   if (!memory) {
     await recordMemoryEvent({ operation: "recall", status: "unavailable", summary: "Memory service unavailable; no Hindsight recall was performed.", query });
     return { status: "unavailable", items: [] };
@@ -436,7 +474,7 @@ async function recallMemory(query: string): Promise<{ status: "connected" | "una
 }
 
 async function reflectMemory(query: string) {
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   if (!memory) {
     await recordMemoryEvent({ operation: "reflect", status: "unavailable", summary: "Memory service unavailable; no Hindsight reflect was performed.", query });
     return { status: "unavailable" as const, text: "" };
@@ -511,6 +549,19 @@ export async function runStrategy(question: string) {
     question,
     brand,
     ...result,
+    recommendation: result.summary,
+    posting_times: result.windows,
+    databaseAnalytics: {
+      totalPosts: analytics.totalPosts,
+      averageEngagementRate: analytics.averageEngagementRate,
+      bestTopic: analytics.bestTopic,
+      bestContentType: analytics.bestContentType,
+      topPosts: analytics.topPosts.slice(0, 5),
+    },
+    hindsightMemories: recall.items,
+    aiRecommendation: result.summary,
+    evidence,
+    memory_used: evidence.slice(0, 6),
     confidence: analytics.totalPosts >= 30 && recall.items.length ? "High" : analytics.totalPosts >= 10 ? "Medium" : "Low",
     memoryStatus: recall.status === "connected" || reflect.status === "connected" ? "connected" : recall.status,
     memoryUsed: evidence.slice(0, 6),
@@ -555,7 +606,7 @@ export async function addPost(input: Omit<SocialPost, "id" | "engagementRate"> &
     await db.insert(socialPosts).values(post);
   }
   const brand = await getBrand();
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   if (!memory) {
     await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Post ${post.postId} was saved, but Hindsight is not configured.`, sourcePostIds: [post.postId] });
   } else {
@@ -580,7 +631,7 @@ export async function getMemoryOverview() {
   } else {
     events = fallback.events.slice(0, 20);
   }
-  const memory = getHindsight();
+  const memory = await verifyHindsightBank();
   let memories: MemoryItem[] = [];
   let status: "connected" | "unavailable" | "error" = memory ? "connected" : "unavailable";
   if (memory) {
@@ -592,12 +643,37 @@ export async function getMemoryOverview() {
       status = "error";
     }
   }
-  return { status, bankId: hindsightBankId, configured: hindsightConfigured, events, memories, count: memories.length, lifecycle: ["RETAIN", "RECALL", "REFLECT"] };
+  const learnedObservations = memories.filter(item => /observation|lesson|preference/i.test(item.type || ""));
+  return { status, bankId: hindsightBankId, configured: hindsightConfigured, events, memories, learnedObservations, count: memories.length, lifecycle: ["RETAIN", "RECALL", "REFLECT"] };
 }
 
 export async function searchMemory(query: string) {
   const result = await recallMemory(query);
   return { ...result, query };
+}
+
+export async function retainMemory(input: { content: string; context?: string; documentId?: string; sourcePostIds?: string[] }) {
+  const memory = await verifyHindsightBank();
+  if (!memory) {
+    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: "Memory service unavailable; no Hindsight retain was performed.", sourcePostIds: input.sourcePostIds });
+    return { status: "unavailable" as const, retained: false, bankId: hindsightBankId };
+  }
+  try {
+    await memory.retain(hindsightBankId, input.content, {
+      context: input.context || "SocialMind learning",
+      documentId: input.documentId,
+      tags: ["socialmind", "manual-retain"],
+    });
+    await recordMemoryEvent({ operation: "retain", status: "retained", summary: "Memory retained in Hindsight.", sourcePostIds: input.sourcePostIds });
+    return { status: "connected" as const, retained: true, bankId: hindsightBankId };
+  } catch (error) {
+    await recordMemoryEvent({ operation: "retain", status: "error", summary: `Hindsight retain failed: ${error instanceof Error ? error.message : "unknown error"}`, sourcePostIds: input.sourcePostIds });
+    return { status: "error" as const, retained: false, bankId: hindsightBankId };
+  }
+}
+
+export async function reflect(query: string) {
+  return reflectMemory(query);
 }
 
 export async function getDashboard() {

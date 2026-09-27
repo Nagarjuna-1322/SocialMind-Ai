@@ -1,27 +1,10 @@
-# SocialMind AI build tracker
 
-## Completed
+## Hindsight follow-up completed
 
-- [x] Initialize full-stack WebDev project with React, Express, tRPC, Drizzle, and managed database.
-- [x] Add `brands`, `socialPosts`, and `memoryEvents` tables; apply migration `0001_material_odin.sql`.
-- [x] Import the supplied TechNova brand profile and social performance CSV as idempotent seed data.
-- [x] Implement analytics KPIs, trend, topic/format/platform/time breakdowns, top/bottom posts, and honest empty states.
-- [x] Implement Hindsight `retain`, `retainBatch`, `recall`, `reflect`, and `listMemories` integration with traceable statuses.
-- [x] Implement server-side structured LLM generation with deterministic fallback behavior.
-- [x] Build dashboard, content history, analytics, AI strategy, content generator, AI memory, brand profile, and settings pages.
-- [x] Add REST endpoints and typed tRPC procedures.
-- [x] Add unit tests for analytics and preserve the scaffold auth logout test.
-- [x] Add architecture, API, Hindsight integration, and demo documentation.
-
-## Verification
-
-- [x] `pnpm check`
-- [x] `pnpm test` — 2 files, 3 tests passed
-- [x] `pnpm build`
-- [x] `/api/dashboard`, `/api/strategy`, and `/api/content/generate` smoke-tested
-- [x] Desktop screenshots reviewed for dashboard, history, strategy, memory, brand, and generator
-
-## Environment and performance notes
-
-- [x] Hindsight integration is implemented and documented. Configure `HINDSIGHT_BASE_URL` and `HINDSIGHT_API_KEY` in the server environment to activate live durable memory; the current preview reports `Memory service unavailable` honestly until those values exist.
-- [x] Production build completes successfully. Vite reports a non-blocking bundle-size advisory; manual chunk splitting is optional follow-up rather than a correctness issue.
+- [x] Add real authenticated `GET /api/hindsight/health` bank verification with HTTP 503 on missing/invalid/unavailable service.
+- [x] Verify or create the configured Hindsight bank before memory writes and reads.
+- [x] Add `POST /api/memory/retain`, `/recall`, and `/reflect` while preserving the existing `/api/memory/search` route.
+- [x] Add integration-friendly strategy response fields: `recommendation`, `posting_times`, `memory_used`, `evidence`, database analytics, Hindsight memories, and AI recommendation layers.
+- [x] Update the existing AI Memory and AI Strategy pages without rebuilding the frontend.
+- [x] Confirm the current environment reports Hindsight as not connected because no API key is configured; no Hindsight response is fabricated.
+- [x] Re-run `pnpm check`, `pnpm test`, `pnpm build`, REST smoke tests, and visual QA.
