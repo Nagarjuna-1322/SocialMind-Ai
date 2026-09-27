@@ -80,9 +80,9 @@ export async function hindsightHealth() {
     return { connected: false, bankId: hindsightBankId, message: "Hindsight API key or base URL is not configured." };
   }
   try {
-    // A bank profile read is an authenticated, bank-specific round trip. It
+    // A bank config read is an authenticated, bank-specific round trip. It
     // verifies both the API key and the configured bank ID without writing data.
-    await memory.getBankProfile(hindsightBankId);
+    await memory.getBankConfig(hindsightBankId);
     return { connected: true, bankId: hindsightBankId, message: "Hindsight connection successful" };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Hindsight connection failed";
@@ -94,7 +94,7 @@ async function verifyHindsightBank() {
   const memory = getHindsight();
   if (!memory) return null;
   try {
-    await memory.getBankProfile(hindsightBankId);
+    await memory.getBankConfig(hindsightBankId);
     return memory;
   } catch {
     try {
