@@ -451,8 +451,8 @@ export function calculateAnalytics(posts: SocialPost[]) {
   };
 }
 
-function extractPostIds(text: string) {
-  return Array.from(new Set(text.match(/P\d{3}/g) || []));
+export function extractPostIds(text: string) {
+  return Array.from(new Set(text.match(/\bP[A-Z0-9_-]*\d[A-Z0-9_-]*\b/gi) || []));
 }
 
 async function recallMemory(query: string): Promise<{ status: "connected" | "unavailable" | "error"; items: MemoryItem[]; text?: string }> {

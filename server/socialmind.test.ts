@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateAnalytics } from "./socialmind";
+import { calculateAnalytics, extractPostIds } from "./socialmind";
 
 const post = (overrides: Record<string, unknown> = {}) => ({
   postId: "P001",
@@ -44,5 +44,9 @@ describe("SocialMind analytics", () => {
     expect(result.averageEngagementRate).toBe(0);
     expect(result.bestTopic).toBe("Not enough data");
     expect(result.insights[0]).toContain("Import posts");
+  });
+
+  it("preserves numeric and named source post IDs from memory text", () => {
+    expect(extractPostIds("P021 and PSMOKE27 informed this recommendation; P021 was repeated.")).toEqual(["P021", "PSMOKE27"]);
   });
 });
