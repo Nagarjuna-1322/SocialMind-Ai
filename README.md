@@ -1,4 +1,3 @@
-
 ## Deploying to Vercel
 
 The existing Express backend now has a Vercel-compatible entrypoint at `api/index.ts`, while the existing Vite frontend is emitted to `dist/public`. `vercel.json` keeps the current build command and serves the SPA output without changing the local development server.
