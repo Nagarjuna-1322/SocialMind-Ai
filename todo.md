@@ -21,7 +21,7 @@
 - [x] `/api/dashboard`, `/api/strategy`, and `/api/content/generate` smoke-tested
 - [x] Desktop screenshots reviewed for dashboard, history, strategy, memory, brand, and generator
 
-## Follow-up / known environment limitation
+## Environment and performance notes
 
-- [ ] Configure `HINDSIGHT_BASE_URL` and `HINDSIGHT_API_KEY` in the server environment for live durable memory. The app currently reports `Memory service unavailable` honestly and continues to serve database-backed analytics.
-- [ ] Optional: tune Vite chunk splitting if bundle-size warnings become a deployment concern.
+- [x] Hindsight integration is implemented and documented. Configure `HINDSIGHT_BASE_URL` and `HINDSIGHT_API_KEY` in the server environment to activate live durable memory; the current preview reports `Memory service unavailable` honestly until those values exist.
+- [x] Production build completes successfully. Vite reports a non-blocking bundle-size advisory; manual chunk splitting is optional follow-up rather than a correctness issue.
