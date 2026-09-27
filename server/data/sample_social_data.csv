@@ -1,0 +1,81 @@
+post_id,date,platform,topic,content_type,caption,views,reach,likes,comments,shares,engagement_rate,posting_time,audience_response
+P001,2026-02-19,X,Machine Learning,Reel,Machine Learning: practical insights and examples for modern teams.,10419,12518,388,62,52,4.01,18:00,Comments focused on real-world use cases.
+P002,2026-07-08,Instagram,Generative AI,Reel,Generative AI: practical insights and examples for modern teams.,11990,13098,633,34,42,5.41,17:00,Comments focused on real-world use cases.
+P003,2026-07-04,Instagram,Cybersecurity,Reel,Cybersecurity: practical insights and examples for modern teams.,12918,10928,520,42,76,5.84,20:00,Audience liked the concise format.
+P004,2026-05-27,LinkedIn,Cloud Computing,Tutorial,Cloud Computing: practical insights and examples for modern teams.,20237,16907,1017,69,171,7.43,08:00,Low discussion; mostly passive views.
+P005,2026-02-13,Instagram,Cloud Computing,Tutorial,Cloud Computing: practical insights and examples for modern teams.,4550,5391,279,46,49,6.94,10:00,Audience liked the concise format.
+P006,2026-02-20,LinkedIn,Web Development,Case Study,Web Development: practical insights and examples for modern teams.,11991,13281,534,80,73,5.17,12:00,Low discussion; mostly passive views.
+P007,2026-04-22,X,Python,Tutorial,Python: practical insights and examples for modern teams.,7247,8041,365,33,61,5.71,17:00,Audience liked the concise format.
+P008,2026-06-07,Instagram,Generative AI,Carousel,Generative AI: practical insights and examples for modern teams.,15422,18419,612,49,105,4.16,19:00,Low discussion; mostly passive views.
+P009,2026-07-19,X,Web Development,Text,Web Development: practical insights and examples for modern teams.,4840,4444,191,16,22,5.15,21:00,Comments focused on real-world use cases.
+P010,2026-07-20,Instagram,Cloud Computing,Carousel,Cloud Computing: practical insights and examples for modern teams.,3989,3478,265,47,16,9.43,21:00,Audience requested more practical examples.
+P011,2026-02-22,X,Data Science,Text,Data Science: practical insights and examples for modern teams.,11169,12354,433,57,74,4.57,21:00,Audience asked for beginner resources.
+P012,2026-05-17,LinkedIn,Cybersecurity,Case Study,Cybersecurity: practical insights and examples for modern teams.,10231,12217,500,59,86,5.28,10:00,Several users asked for a tutorial.
+P013,2026-01-20,LinkedIn,Machine Learning,Case Study,Machine Learning: practical insights and examples for modern teams.,7005,8511,319,23,55,4.66,17:00,Audience liked the concise format.
+P014,2026-08-27,Instagram,Web Development,Reel,Web Development: practical insights and examples for modern teams.,12060,10075,460,39,54,5.49,19:00,Audience requested more practical examples.
+P015,2026-04-23,X,Python,Carousel,Python: practical insights and examples for modern teams.,11507,14199,392,50,48,3.45,21:00,Audience liked the concise format.
+P016,2026-01-19,X,Data Science,Case Study,Data Science: practical insights and examples for modern teams.,15483,12832,1153,135,86,10.71,19:00,Audience asked for beginner resources.
+P017,2026-06-03,Instagram,AI Tools,Tutorial,AI Tools: practical insights and examples for modern teams.,5128,4174,327,19,16,8.67,08:00,Audience asked for beginner resources.
+P018,2026-04-26,X,AI Tools,Image,AI Tools: practical insights and examples for modern teams.,6010,6366,328,51,53,6.79,21:00,Comments focused on real-world use cases.
+P019,2026-02-02,Instagram,Data Science,Carousel,Data Science: practical insights and examples for modern teams.,13296,14999,647,73,68,5.25,10:00,Comments focused on real-world use cases.
+P020,2026-02-15,Instagram,Cloud Computing,Reel,Cloud Computing: practical insights and examples for modern teams.,7862,7926,428,30,28,6.13,17:00,Audience asked for beginner resources.
+P021,2026-04-28,X,Machine Learning,Reel,Machine Learning: practical insights and examples for modern teams.,5639,5743,428,75,27,9.23,08:00,Comments focused on real-world use cases.
+P022,2026-08-05,LinkedIn,Generative AI,Carousel,Generative AI: practical insights and examples for modern teams.,13344,13215,528,88,54,5.07,08:00,Several users asked for a tutorial.
+P023,2026-03-02,Instagram,Cybersecurity,Carousel,Cybersecurity: practical insights and examples for modern teams.,14754,17907,623,35,66,4.04,08:00,Audience asked for beginner resources.
+P024,2026-01-20,Instagram,Machine Learning,Carousel,Machine Learning: practical insights and examples for modern teams.,13562,14326,981,108,168,8.77,10:00,Audience requested more practical examples.
+P025,2026-05-15,X,Data Science,Case Study,Data Science: practical insights and examples for modern teams.,10835,10597,392,61,28,4.54,19:00,Audience liked the concise format.
+P026,2026-02-08,LinkedIn,Machine Learning,Reel,Machine Learning: practical insights and examples for modern teams.,5180,4957,282,35,16,6.72,10:00,Audience liked the concise format.
+P027,2026-05-22,LinkedIn,Cybersecurity,Carousel,Cybersecurity: practical insights and examples for modern teams.,15025,16535,1188,203,135,9.23,18:00,Audience requested more practical examples.
+P028,2026-04-22,Instagram,Python,Image,Python: practical insights and examples for modern teams.,14663,16465,812,73,101,5.99,10:00,Low discussion; mostly passive views.
+P029,2026-03-21,LinkedIn,Cybersecurity,Tutorial,Cybersecurity: practical insights and examples for modern teams.,5331,4273,160,18,12,4.45,18:00,Audience liked the concise format.
+P030,2026-01-27,LinkedIn,Python,Case Study,Python: practical insights and examples for modern teams.,18702,22568,477,29,78,2.59,20:00,Audience liked the concise format.
+P031,2026-06-07,Instagram,Python,Text,Python: practical insights and examples for modern teams.,7550,6175,340,64,59,7.5,08:00,Low discussion; mostly passive views.
+P032,2026-04-28,Instagram,AI Tools,Case Study,AI Tools: practical insights and examples for modern teams.,18676,16239,1375,152,174,10.47,19:00,Several users asked for a tutorial.
+P033,2026-04-09,Instagram,Python,Text,Python: practical insights and examples for modern teams.,14567,16044,1104,184,107,8.69,12:00,Several users asked for a tutorial.
+P034,2026-04-08,Instagram,Machine Learning,Text,Machine Learning: practical insights and examples for modern teams.,6144,7183,221,41,19,3.91,21:00,Audience requested more practical examples.
+P035,2026-06-01,LinkedIn,AI Tools,Text,AI Tools: practical insights and examples for modern teams.,4364,4276,341,31,44,9.73,18:00,Audience requested more practical examples.
+P036,2026-02-13,X,Cybersecurity,Carousel,Cybersecurity: practical insights and examples for modern teams.,3751,3530,116,13,16,4.11,18:00,Audience asked for beginner resources.
+P037,2026-04-12,Instagram,AI Tools,Image,AI Tools: practical insights and examples for modern teams.,3032,3708,162,27,22,5.69,20:00,Comments focused on real-world use cases.
+P038,2026-07-11,LinkedIn,Machine Learning,Case Study,Machine Learning: practical insights and examples for modern teams.,21388,20087,1532,241,125,9.45,19:00,Comments focused on real-world use cases.
+P039,2026-05-13,Instagram,Cybersecurity,Tutorial,Cybersecurity: practical insights and examples for modern teams.,13143,11543,809,86,117,8.77,17:00,Audience asked for beginner resources.
+P040,2026-04-17,LinkedIn,Generative AI,Image,Generative AI: practical insights and examples for modern teams.,14314,14296,976,137,83,8.37,17:00,Comments focused on real-world use cases.
+P041,2026-04-22,Instagram,Python,Case Study,Python: practical insights and examples for modern teams.,17512,21511,1077,153,57,5.98,18:00,Audience liked the concise format.
+P042,2026-07-21,Instagram,AI Tools,Carousel,AI Tools: practical insights and examples for modern teams.,3257,2712,125,15,19,5.86,08:00,Audience asked for beginner resources.
+P043,2026-02-25,X,AI Tools,Case Study,AI Tools: practical insights and examples for modern teams.,16958,20378,796,57,108,4.72,20:00,Comments focused on real-world use cases.
+P044,2026-08-22,X,AI Tools,Carousel,AI Tools: practical insights and examples for modern teams.,3322,2856,184,34,10,7.98,21:00,Audience asked for beginner resources.
+P045,2026-04-27,X,Cloud Computing,Text,Cloud Computing: practical insights and examples for modern teams.,13771,13805,682,50,109,6.09,20:00,Low discussion; mostly passive views.
+P046,2026-02-05,LinkedIn,Cybersecurity,Tutorial,Cybersecurity: practical insights and examples for modern teams.,9798,9319,481,75,35,6.34,17:00,Several users asked for a tutorial.
+P047,2026-01-07,X,AI Tools,Text,AI Tools: practical insights and examples for modern teams.,14073,14209,517,58,44,4.36,12:00,Comments focused on real-world use cases.
+P048,2026-07-18,X,Data Science,Tutorial,Data Science: practical insights and examples for modern teams.,16704,19026,767,39,68,4.59,08:00,Low discussion; mostly passive views.
+P049,2026-03-27,Instagram,AI Tools,Text,AI Tools: practical insights and examples for modern teams.,11568,13409,598,64,79,5.53,18:00,Comments focused on real-world use cases.
+P050,2026-08-06,X,Python,Tutorial,Python: practical insights and examples for modern teams.,12537,12447,721,107,37,6.95,08:00,Audience requested more practical examples.
+P051,2026-07-09,LinkedIn,Cybersecurity,Text,Cybersecurity: practical insights and examples for modern teams.,9949,11325,427,70,39,4.73,17:00,Audience requested more practical examples.
+P052,2026-01-08,X,Web Development,Reel,Web Development: practical insights and examples for modern teams.,11526,9429,430,25,74,5.61,08:00,Several users asked for a tutorial.
+P053,2026-05-25,Instagram,Generative AI,Tutorial,Generative AI: practical insights and examples for modern teams.,8679,8759,443,29,76,6.26,17:00,Audience liked the concise format.
+P054,2026-07-13,X,Python,Tutorial,Python: practical insights and examples for modern teams.,7256,6823,566,37,24,9.19,10:00,Low discussion; mostly passive views.
+P055,2026-01-12,X,AI Tools,Reel,AI Tools: practical insights and examples for modern teams.,5836,6784,369,35,50,6.69,17:00,Audience asked for beginner resources.
+P056,2026-07-12,LinkedIn,Data Science,Case Study,Data Science: practical insights and examples for modern teams.,15104,15415,915,47,90,6.82,10:00,Low discussion; mostly passive views.
+P057,2026-08-15,Instagram,Web Development,Case Study,Web Development: practical insights and examples for modern teams.,8616,10026,563,109,43,7.13,20:00,Comments focused on real-world use cases.
+P058,2026-07-11,Instagram,Cybersecurity,Image,Cybersecurity: practical insights and examples for modern teams.,7069,7596,519,44,54,8.12,10:00,Audience requested more practical examples.
+P059,2026-05-18,Instagram,Web Development,Image,Web Development: practical insights and examples for modern teams.,5975,6382,265,23,20,4.83,21:00,Audience requested more practical examples.
+P060,2026-08-26,Instagram,AI Tools,Reel,AI Tools: practical insights and examples for modern teams.,16806,18828,933,80,99,5.91,20:00,Audience requested more practical examples.
+P061,2026-06-14,Instagram,Machine Learning,Image,Machine Learning: practical insights and examples for modern teams.,16600,17414,637,95,58,4.54,20:00,Low discussion; mostly passive views.
+P062,2026-03-07,X,Cloud Computing,Image,Cloud Computing: practical insights and examples for modern teams.,6938,6535,290,24,40,5.42,21:00,Several users asked for a tutorial.
+P063,2026-03-09,X,Web Development,Image,Web Development: practical insights and examples for modern teams.,4976,4657,352,33,31,8.93,18:00,Audience requested more practical examples.
+P064,2026-08-16,LinkedIn,Generative AI,Tutorial,Generative AI: practical insights and examples for modern teams.,24605,26040,1790,221,290,8.84,12:00,Comments focused on real-world use cases.
+P065,2026-01-05,Instagram,Cloud Computing,Carousel,Cloud Computing: practical insights and examples for modern teams.,12392,13131,387,23,42,3.44,18:00,Several users asked for a tutorial.
+P066,2026-07-15,Instagram,Cybersecurity,Reel,Cybersecurity: practical insights and examples for modern teams.,16300,14695,1092,153,164,9.59,10:00,Comments focused on real-world use cases.
+P067,2026-04-21,LinkedIn,Cybersecurity,Tutorial,Cybersecurity: practical insights and examples for modern teams.,18905,23185,1118,158,160,6.19,18:00,Several users asked for a tutorial.
+P068,2026-08-10,Instagram,Cybersecurity,Case Study,Cybersecurity: practical insights and examples for modern teams.,9000,9024,311,19,12,3.79,12:00,Audience requested more practical examples.
+P069,2026-04-14,X,AI Tools,Image,AI Tools: practical insights and examples for modern teams.,16820,15458,1215,73,88,8.9,18:00,Audience requested more practical examples.
+P070,2026-05-15,Instagram,AI Tools,Case Study,AI Tools: practical insights and examples for modern teams.,7727,8785,223,16,18,2.93,18:00,Audience requested more practical examples.
+P071,2026-07-24,LinkedIn,Web Development,Case Study,Web Development: practical insights and examples for modern teams.,11135,9107,584,72,29,7.52,20:00,Audience liked the concise format.
+P072,2026-05-19,Instagram,Cybersecurity,Reel,Cybersecurity: practical insights and examples for modern teams.,18965,23702,1346,183,233,7.43,17:00,Audience requested more practical examples.
+P073,2026-02-16,X,Python,Text,Python: practical insights and examples for modern teams.,7057,7207,246,33,31,4.3,21:00,Audience liked the concise format.
+P074,2026-01-15,LinkedIn,Data Science,Image,Data Science: practical insights and examples for modern teams.,5134,6290,221,34,17,4.32,10:00,Audience requested more practical examples.
+P075,2026-08-14,LinkedIn,Cloud Computing,Image,Cloud Computing: practical insights and examples for modern teams.,9122,10866,661,114,26,7.37,10:00,Audience requested more practical examples.
+P076,2026-05-15,LinkedIn,AI Tools,Tutorial,AI Tools: practical insights and examples for modern teams.,17844,15327,879,50,68,6.5,21:00,Low discussion; mostly passive views.
+P077,2026-02-15,Instagram,Web Development,Reel,Web Development: practical insights and examples for modern teams.,19780,16653,666,88,78,5.0,17:00,Audience requested more practical examples.
+P078,2026-08-18,X,Python,Text,Python: practical insights and examples for modern teams.,13004,13166,829,93,89,7.68,18:00,Several users asked for a tutorial.
+P079,2026-05-27,X,Data Science,Carousel,Data Science: practical insights and examples for modern teams.,3643,4445,146,24,14,4.14,12:00,Audience requested more practical examples.
+P080,2026-07-15,LinkedIn,Cybersecurity,Case Study,Cybersecurity: practical insights and examples for modern teams.,6907,7896,342,41,29,5.22,21:00,Audience liked the concise format.

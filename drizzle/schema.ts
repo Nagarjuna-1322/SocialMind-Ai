@@ -1,17 +1,7 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { double, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
 
-/**
- * Core user table backing auth flow.
- * Extend this file with additional tables as your product grows.
- * Columns use camelCase to match both database fields and generated types.
- */
 export const users = mysqlTable("users", {
-  /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
-   * Use this for relations between tables.
-   */
   id: int("id").autoincrement().primaryKey(),
-  /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
@@ -22,7 +12,53 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
+export const brands = mysqlTable("brands", {
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 160 }).notNull(),
+  industry: varchar("industry", { length: 160 }).notNull(),
+  targetAudience: text("targetAudience").notNull(),
+  brandTone: text("brandTone").notNull(),
+  platforms: text("platforms").notNull(),
+  contentGoals: text("contentGoals").notNull(),
+  preferredFormats: text("preferredFormats").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const socialPosts = mysqlTable("socialPosts", {
+  id: int("id").autoincrement().primaryKey(),
+  postId: varchar("postId", { length: 64 }).notNull().unique(),
+  date: timestamp("date").notNull(),
+  platform: varchar("platform", { length: 40 }).notNull(),
+  topic: varchar("topic", { length: 120 }).notNull(),
+  contentType: varchar("contentType", { length: 80 }).notNull(),
+  caption: text("caption").notNull(),
+  views: int("views").notNull().default(0),
+  reach: int("reach").notNull().default(0),
+  likes: int("likes").notNull().default(0),
+  comments: int("comments").notNull().default(0),
+  shares: int("shares").notNull().default(0),
+  engagementRate: double("engagementRate").notNull().default(0),
+  postingTime: varchar("postingTime", { length: 20 }).notNull(),
+  audienceResponse: text("audienceResponse").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export const memoryEvents = mysqlTable("memoryEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  operation: mysqlEnum("operation", ["retain", "recall", "reflect"]).notNull(),
+  status: varchar("status", { length: 40 }).notNull(),
+  summary: text("summary").notNull(),
+  query: text("query"),
+  sourcePostIds: text("sourcePostIds"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
-
-// TODO: Add your tables here
+export type Brand = typeof brands.$inferSelect;
+export type InsertBrand = typeof brands.$inferInsert;
+export type SocialPost = typeof socialPosts.$inferSelect;
+export type InsertSocialPost = typeof socialPosts.$inferInsert;
+export type MemoryEvent = typeof memoryEvents.$inferSelect;
+export type InsertMemoryEvent = typeof memoryEvents.$inferInsert;
