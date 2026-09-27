@@ -1,4 +1,12 @@
 
-## Hindsight integration status
+## Deploying to Vercel
 
-The existing React frontend remains intact. Hindsight is integrated into the existing server-side backend through the official client, with bank verification before reads/writes. Use `GET /api/hindsight/health` to test the configured connection. The UI only shows **Hindsight Connected** after that backend health check succeeds; otherwise it clearly shows **Hindsight Not Connected** and never fabricates retained memories. See [HINDSIGHT_INTEGRATION.md](docs/HINDSIGHT_INTEGRATION.md) for the endpoint contract and error behavior.
+The existing Express backend now has a Vercel-compatible entrypoint at `api/index.ts`, while the existing Vite frontend is emitted to `dist/public`. `vercel.json` keeps the current build command and serves the SPA output without changing the local development server.
+
+1. Install the project dependencies with `pnpm install`.
+2. Authenticate with Vercel using `pnpm vercel login` or `vercel login`.
+3. Link the project with `pnpm exec vercel link`.
+4. Add the server-side environment variables in Vercel Project Settings: `DATABASE_URL`, `JWT_SECRET`, the existing Manus Forge variables, `HINDSIGHT_BASE_URL`, `HINDSIGHT_API_KEY`, and `HINDSIGHT_BANK_ID`.
+5. Preview locally with `pnpm vercel:dev`, validate the deployment planner with `pnpm vercel:build`, and deploy with `pnpm vercel:deploy`.
+
+Hindsight and LLM credentials are never placed in the React bundle; they are read only by the serverless Express function.
