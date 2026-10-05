@@ -54,6 +54,19 @@ export const memoryEvents = mysqlTable("memoryEvents", {
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
+export const instagramConnections = mysqlTable("instagramConnections", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceKey: varchar("workspaceKey", { length: 120 }).notNull().unique(),
+  instagramUserId: varchar("instagramUserId", { length: 120 }).notNull(),
+  username: varchar("username", { length: 160 }).notNull(),
+  accountType: varchar("accountType", { length: 40 }),
+  accessTokenEncrypted: text("accessTokenEncrypted").notNull(),
+  tokenExpiresAt: timestamp("tokenExpiresAt"),
+  lastSyncedAt: timestamp("lastSyncedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Brand = typeof brands.$inferSelect;
@@ -62,3 +75,5 @@ export type SocialPost = typeof socialPosts.$inferSelect;
 export type InsertSocialPost = typeof socialPosts.$inferInsert;
 export type MemoryEvent = typeof memoryEvents.$inferSelect;
 export type InsertMemoryEvent = typeof memoryEvents.$inferInsert;
+export type InstagramConnection = typeof instagramConnections.$inferSelect;
+export type InsertInstagramConnection = typeof instagramConnections.$inferInsert;

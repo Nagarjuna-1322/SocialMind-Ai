@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertInstagramConnection, InsertSocialPost, InsertUser, InstagramConnection, instagramConnections, socialPosts, users } from "../drizzle/schema";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -53,4 +53,31 @@ export async function getUserByOpenId(openId: string) {
   if (!db) return undefined;
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getInstagramConnection(workspaceKey: string): Promise<InstagramConnection | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(instagramConnections).where(eq(instagramConnections.workspaceKey, workspaceKey)).limit(1);
+  return result[0];
+}
+
+export async function upsertInstagramConnection(connection: InsertInstagramConnection): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const { workspaceKey, ...rest } = connection;
+  await db.insert(instagramConnections).values({ workspaceKey, ...rest }).onDuplicateKeyUpdate({ set: rest });
+}
+
+export async function deleteInstagramConnection(workspaceKey: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  await db.delete(instagramConnections).where(eq(instagramConnections.workspaceKey, workspaceKey));
+}
+
+export async function upsertInstagramPost(post: InsertSocialPost): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database is not configured");
+  const { postId, ...updateSet } = post;
+  await db.insert(socialPosts).values({ postId, ...updateSet }).onDuplicateKeyUpdate({ set: updateSet });
 }

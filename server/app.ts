@@ -5,6 +5,7 @@ import { registerOAuthRoutes } from "./_core/oauth";
 import { registerStorageProxy } from "./_core/storageProxy";
 import { appRouter } from "./routers";
 import { createContext } from "./_core/context";
+import { registerInstagramRoutes } from "./instagram";
 import { addPost, generateContent, getBrand, getDashboard, getMemoryOverview, hindsightHealth, listPosts, reflect, retainMemory, runStrategy, searchMemory, updateBrand, seedDemoData } from "./socialmind";
 
 function asyncRoute(handler: (req: express.Request, res: express.Response) => Promise<unknown>) {
@@ -32,6 +33,7 @@ export function createApp(options: { vercel?: boolean } = {}) {
 
   registerStorageProxy(app);
   registerOAuthRoutes(app);
+  registerInstagramRoutes(app);
 
   app.get("/api/dashboard", asyncRoute(async (_req, res) => res.json(await getDashboard())));
   app.get("/api/posts", asyncRoute(async (req, res) => res.json(await listPosts({ platform: String(req.query.platform || ""), topic: String(req.query.topic || ""), contentType: String(req.query.contentType || ""), search: String(req.query.search || "") }))));

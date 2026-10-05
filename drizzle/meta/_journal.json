@@ -15,6 +15,13 @@
       "when": 1790504219423,
       "tag": "0001_material_odin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1791206652335,
+      "tag": "0002_curious_elektra",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@ import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
+import { disconnectInstagram, getInstagramStatus, syncInstagramMedia } from "./instagram";
 import { addPost, generateContent, getBrand, getDashboard, getMemoryOverview, listPosts, runStrategy, seedDemoData, searchMemory, updateBrand } from "./socialmind";
 
 const postInput = z.object({
@@ -53,6 +54,9 @@ export const appRouter = router({
     searchMemory: publicProcedure.input(z.object({ query: z.string().min(2) })).mutation(({ input }) => searchMemory(input.query)),
     brand: publicProcedure.query(() => getBrand()),
     updateBrand: publicProcedure.input(brandInput).mutation(({ input }) => updateBrand(input)),
+    instagramStatus: publicProcedure.query(() => getInstagramStatus()),
+    syncInstagram: publicProcedure.mutation(() => syncInstagramMedia()),
+    disconnectInstagram: publicProcedure.mutation(() => disconnectInstagram()),
   }),
 });
 
