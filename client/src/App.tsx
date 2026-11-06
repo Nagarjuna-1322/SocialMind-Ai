@@ -6,6 +6,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { SupabaseAuthProvider, useSupabaseAuth } from "./contexts/SupabaseAuthContext";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import VerifyEmail from "./pages/VerifyEmail";
+import ResetPassword from "./pages/ResetPassword";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -19,6 +22,9 @@ function ProtectedWorkspace() {
 function Router() {
   return <Switch>
     <Route path="/login" component={Login} />
+    <Route path="/auth/verify" component={VerifyEmail} />
+    <Route path="/auth/callback" component={AuthCallback} />
+    <Route path="/reset-password" component={ResetPassword} />
     <Route path="/" component={ProtectedWorkspace} />
     <Route path="/history" component={ProtectedWorkspace} />
     <Route path="/analytics" component={ProtectedWorkspace} />

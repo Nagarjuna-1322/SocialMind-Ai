@@ -25,6 +25,26 @@ export const brands = mysqlTable("brands", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
 
+export const workspaces = mysqlTable("workspaces", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerSupabaseUserId: varchar("ownerSupabaseUserId", { length: 128 }).notNull().unique(),
+  name: varchar("name", { length: 160 }).notNull(),
+  slug: varchar("slug", { length: 180 }).notNull().unique(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export const supabaseProfiles = mysqlTable("supabaseProfiles", {
+  id: int("id").autoincrement().primaryKey(),
+  supabaseUserId: varchar("supabaseUserId", { length: 128 }).notNull().unique(),
+  workspaceId: int("workspaceId").notNull(),
+  email: varchar("email", { length: 320 }),
+  displayName: varchar("displayName", { length: 160 }),
+  avatarUrl: text("avatarUrl"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
 export const socialPosts = mysqlTable("socialPosts", {
   id: int("id").autoincrement().primaryKey(),
   postId: varchar("postId", { length: 64 }).notNull().unique(),
@@ -69,6 +89,10 @@ export const instagramConnections = mysqlTable("instagramConnections", {
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+export type Workspace = typeof workspaces.$inferSelect;
+export type InsertWorkspace = typeof workspaces.$inferInsert;
+export type SupabaseProfile = typeof supabaseProfiles.$inferSelect;
+export type InsertSupabaseProfile = typeof supabaseProfiles.$inferInsert;
 export type Brand = typeof brands.$inferSelect;
 export type InsertBrand = typeof brands.$inferInsert;
 export type SocialPost = typeof socialPosts.$inferSelect;

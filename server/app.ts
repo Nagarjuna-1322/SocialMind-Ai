@@ -8,6 +8,7 @@ import { createContext } from "./_core/context";
 import { registerInstagramRoutes } from "./instagram";
 import { addPost, generateContent, getBrand, getDashboard, getMemoryOverview, hindsightHealth, listPosts, reflect, retainMemory, runStrategy, searchMemory, updateBrand, seedDemoData } from "./socialmind";
 import { ENV } from "./_core/env";
+import { registerSupabaseAuthRoutes } from "./supabase-auth";
 
 function asyncRoute(handler: (req: express.Request, res: express.Response) => Promise<unknown>) {
   return (req: express.Request, res: express.Response) => handler(req, res).catch(error => {
@@ -35,6 +36,7 @@ export function createApp(options: { vercel?: boolean } = {}) {
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   registerInstagramRoutes(app);
+  registerSupabaseAuthRoutes(app);
 
   app.get("/api/auth/config", (_req, res) => res.json({
     url: ENV.supabaseUrl,
