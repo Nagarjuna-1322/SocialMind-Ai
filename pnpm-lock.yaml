@@ -106,6 +106,9 @@ importers:
       '@supabase/server':
         specifier: ^1.9.2
         version: 1.9.2(@supabase/supabase-js@2.119.0)(typescript@5.9.3)
+      '@supabase/supabase-js':
+        specifier: ^2.119.0
+        version: 2.119.0
       '@tanstack/react-query':
         specifier: ^5.90.2
         version: 5.90.2(react@19.2.1)

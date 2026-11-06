@@ -11,4 +11,7 @@ export const ENV = {
   instagramAppSecret: process.env.INSTAGRAM_APP_SECRET ?? "",
   instagramRedirectUri: process.env.INSTAGRAM_REDIRECT_URI ?? "",
   instagramApiVersion: process.env.INSTAGRAM_API_VERSION ?? "v25.0",
+  supabaseUrl: process.env.SUPABASE_URL ?? "",
+  supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? "",
+  supabaseJwksUrl: process.env.SUPABASE_JWKS_URL ?? "",
 };

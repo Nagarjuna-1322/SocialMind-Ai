@@ -21,6 +21,7 @@ import {
   Instagram,
   LayoutDashboard,
   Lightbulb,
+  LogOut,
   Menu,
   MessageCircle,
   PenLine,
@@ -55,6 +56,7 @@ import {
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
+import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 
 const navItems: Array<{ label: string; path: string; icon: LucideIcon; group: string }> = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard, group: "Workspace" },
@@ -166,8 +168,8 @@ function Sidebar({ location, setLocation, open, setOpen }: { location: string; s
   );
 }
 
-function Topbar({ title, setOpen, onAsk, onImport, importing }: { title: string; setOpen: (value: boolean) => void; onAsk: () => void; onImport: () => void; importing: boolean }) {
-  return <header className="flex min-h-[84px] items-center justify-between gap-4 border-b border-[#e8e9ef] bg-[#f7f8fb]/95 px-5 backdrop-blur sm:px-8"><div className="flex min-w-0 items-center gap-3"><button className="rounded-xl border border-[#e4e6ee] bg-white p-2 text-[#6f7486] lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button><div><div className="eyebrow mb-1 hidden sm:block">TechNova / Workspace</div><div className="font-display truncate text-xl font-semibold tracking-[-0.035em] text-[#20212d]">{title}</div></div></div><div className="flex items-center gap-2"><Button variant="outline" className="hidden h-10 gap-2 rounded-xl border-[#e3e5ed] bg-white px-3 text-xs font-semibold text-[#5a5e70] sm:flex" onClick={onImport} disabled={importing}><Upload className="h-3.5 w-3.5" />{importing ? "Loading…" : "Load sample data"}</Button><Button className="h-10 gap-2 rounded-xl bg-[#5b5ce2] px-3 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(91,92,226,0.18)] hover:bg-[#4e4fc9]" onClick={onAsk}><Sparkles className="h-3.5 w-3.5" />Ask AI</Button></div></header>;
+function Topbar({ title, setOpen, onAsk, onImport, importing, onSignOut }: { title: string; setOpen: (value: boolean) => void; onAsk: () => void; onImport: () => void; importing: boolean; onSignOut: () => void }) {
+  return <header className="flex min-h-[84px] items-center justify-between gap-4 border-b border-[#e8e9ef] bg-[#f7f8fb]/95 px-5 backdrop-blur sm:px-8"><div className="flex min-w-0 items-center gap-3"><button className="rounded-xl border border-[#e4e6ee] bg-white p-2 text-[#6f7486] lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button><div><div className="eyebrow mb-1 hidden sm:block">TechNova / Workspace</div><div className="font-display truncate text-xl font-semibold tracking-[-0.035em] text-[#20212d]">{title}</div></div></div><div className="flex items-center gap-2"><Button variant="outline" className="hidden h-10 gap-2 rounded-xl border-[#e3e5ed] bg-white px-3 text-xs font-semibold text-[#5a5e70] sm:flex" onClick={onImport} disabled={importing}><Upload className="h-3.5 w-3.5" />{importing ? "Loading…" : "Load sample data"}</Button><Button className="h-10 gap-2 rounded-xl bg-[#5b5ce2] px-3 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(91,92,226,0.18)] hover:bg-[#4e4fc9]" onClick={onAsk}><Sparkles className="h-3.5 w-3.5" />Ask AI</Button><Button variant="outline" className="h-10 gap-2 rounded-xl bg-white px-3 text-xs font-semibold text-[#6b6e7d]" onClick={onSignOut}><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></Button></div></header>;
 }
 
 function DashboardView({ data, onNavigate }: { data: any; onNavigate: (path: string) => void }) {
@@ -243,6 +245,7 @@ function SettingsView({ memory, instagram, onImport, importing, onSyncInstagram,
 }
 
 export default function Home() {
+  const { signOut } = useSupabaseAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filters, setFilters] = useState({ platform: "all", topic: "all", contentType: "all", search: "" });
@@ -279,5 +282,5 @@ export default function Home() {
     if (location === "/brand") return <BrandView brand={brandQuery.data || dashboard?.brand} onSave={value => brandMutation.mutate(value)} saving={brandMutation.isPending} />;
     return <SettingsView memory={activeMemory} instagram={instagramQuery.data} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} onSyncInstagram={() => instagramSyncMutation.mutate()} syncingInstagram={instagramSyncMutation.isPending} onDisconnectInstagram={() => instagramDisconnectMutation.mutate()} />;
   };
-  return <div className="flex min-h-screen bg-[#f7f8fb]"><Sidebar location={location} setLocation={setLocation} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="flex min-w-0 flex-1 flex-col"><Topbar title={title} setOpen={setSidebarOpen} onAsk={() => setLocation("/strategy")} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} /><main className="container max-w-[1500px] flex-1 py-6 sm:py-8">{dashboardQuery.isLoading && location === "/" ? <div className="space-y-4"><div className="h-28 animate-pulse rounded-2xl bg-[#eceef5]" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-[#eceef5]" />)}</div><div className="h-80 animate-pulse rounded-2xl bg-[#eceef5]" /></div> : renderPage()}</main><footer className="container max-w-[1500px] pb-6 text-xs text-[#a0a3b0]">SocialMind AI · Memory-backed strategy for teams that want to remember what works.</footer></div></div>;
+  return <div className="flex min-h-screen bg-[#f7f8fb]"><Sidebar location={location} setLocation={setLocation} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="flex min-w-0 flex-1 flex-col"><Topbar title={title} setOpen={setSidebarOpen} onAsk={() => setLocation("/strategy")} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} onSignOut={() => { void signOut(); }} /><main className="container max-w-[1500px] flex-1 py-6 sm:py-8">{dashboardQuery.isLoading && location === "/" ? <div className="space-y-4"><div className="h-28 animate-pulse rounded-2xl bg-[#eceef5]" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-[#eceef5]" />)}</div><div className="h-80 animate-pulse rounded-2xl bg-[#eceef5]" /></div> : renderPage()}</main><footer className="container max-w-[1500px] pb-6 text-xs text-[#a0a3b0]">SocialMind AI · Memory-backed strategy for teams that want to remember what works.</footer></div></div>;
 }
