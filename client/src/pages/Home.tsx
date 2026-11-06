@@ -62,7 +62,6 @@ const navItems: Array<{ label: string; path: string; icon: LucideIcon; group: st
   { label: "Analytics", path: "/analytics", icon: BarChart3, group: "Workspace" },
   { label: "AI strategy", path: "/strategy", icon: Sparkles, group: "AI studio" },
   { label: "Content generator", path: "/generator", icon: PenLine, group: "AI studio" },
-  { label: "AI memory", path: "/memory", icon: BrainCircuit, group: "AI studio" },
   { label: "Brand profile", path: "/brand", icon: Target, group: "Manage" },
   { label: "Settings", path: "/settings", icon: Settings, group: "Manage" },
 ];
@@ -263,7 +262,6 @@ export default function Home() {
   const addPostMutation = trpc.socialmind.addPost.useMutation({ onSuccess: post => { toast.success(`${post.postId} saved and sent to the memory loop`); invalidateAll(); }, onError: error => toast.error(error.message) });
   const strategyMutation = trpc.socialmind.strategy.useMutation({ onSuccess: result => { setStrategy(result); invalidateAll(); }, onError: error => toast.error(error.message) });
   const contentMutation = trpc.socialmind.generateContent.useMutation({ onSuccess: result => { setGeneratedContent(result); invalidateAll(); }, onError: error => toast.error(error.message) });
-  const searchMutation = trpc.socialmind.searchMemory.useMutation({ onError: error => toast.error(error.message) });
   const brandMutation = trpc.socialmind.updateBrand.useMutation({ onSuccess: () => { toast.success("Brand profile saved"); invalidateAll(); }, onError: error => toast.error(error.message) });
   const instagramSyncMutation = trpc.socialmind.syncInstagram.useMutation({ onSuccess: result => { toast.success(`${result.imported} Instagram posts synced`); invalidateAll(); }, onError: error => toast.error(error.message) });
   const instagramDisconnectMutation = trpc.socialmind.disconnectInstagram.useMutation({ onSuccess: () => { toast.success("Instagram disconnected"); invalidateAll(); }, onError: error => toast.error(error.message) });
@@ -278,7 +276,6 @@ export default function Home() {
     if (location === "/analytics") return <AnalyticsView analytics={dashboard?.analytics} />;
     if (location === "/strategy") return <StrategyView strategy={strategy} question={question} setQuestion={setQuestion} onRun={runStrategy} running={strategyMutation.isPending} />;
     if (location === "/generator") return <GeneratorView output={generatedContent} form={generatorForm} setForm={setGeneratorForm} onGenerate={() => contentMutation.mutate(generatorForm)} running={contentMutation.isPending} />;
-    if (location === "/memory") return <MemoryView memory={activeMemory} onSearch={query => searchMutation.mutateAsync({ query })} searching={searchMutation.isPending} />;
     if (location === "/brand") return <BrandView brand={brandQuery.data || dashboard?.brand} onSave={value => brandMutation.mutate(value)} saving={brandMutation.isPending} />;
     return <SettingsView memory={activeMemory} instagram={instagramQuery.data} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} onSyncInstagram={() => instagramSyncMutation.mutate()} syncingInstagram={instagramSyncMutation.isPending} onDisconnectInstagram={() => instagramDisconnectMutation.mutate()} />;
   };
