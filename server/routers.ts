@@ -2,7 +2,7 @@ import { z } from "zod";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, router } from "./_core/trpc";
+import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { disconnectInstagram, getInstagramStatus, syncInstagramMedia } from "./instagram";
 import { addPost, generateContent, getBrand, getDashboard, getMemoryOverview, listPosts, runStrategy, seedDemoData, searchMemory, updateBrand } from "./socialmind";
 
@@ -44,19 +44,19 @@ export const appRouter = router({
     }),
   }),
   socialmind: router({
-    dashboard: publicProcedure.query(() => getDashboard()),
-    posts: publicProcedure.input(z.object({ platform: z.string().optional(), topic: z.string().optional(), contentType: z.string().optional(), search: z.string().optional() }).optional()).query(({ input }) => listPosts(input || {})),
-    seed: publicProcedure.mutation(() => seedDemoData()),
-    addPost: publicProcedure.input(postInput).mutation(({ input }) => addPost({ ...input, date: new Date(input.date) })),
-    strategy: publicProcedure.input(z.object({ question: z.string().min(3) })).mutation(({ input }) => runStrategy(input.question)),
-    generateContent: publicProcedure.input(z.object({ objective: z.string().min(1), topic: z.string().min(1), format: z.string().min(1), audience: z.string().min(1), tone: z.string().min(1) })).mutation(({ input }) => generateContent(input)),
-    memory: publicProcedure.query(() => getMemoryOverview()),
-    searchMemory: publicProcedure.input(z.object({ query: z.string().min(2) })).mutation(({ input }) => searchMemory(input.query)),
-    brand: publicProcedure.query(() => getBrand()),
-    updateBrand: publicProcedure.input(brandInput).mutation(({ input }) => updateBrand(input)),
-    instagramStatus: publicProcedure.query(() => getInstagramStatus()),
-    syncInstagram: publicProcedure.mutation(() => syncInstagramMedia()),
-    disconnectInstagram: publicProcedure.mutation(() => disconnectInstagram()),
+    dashboard: protectedProcedure.query(() => getDashboard()),
+    posts: protectedProcedure.input(z.object({ platform: z.string().optional(), topic: z.string().optional(), contentType: z.string().optional(), search: z.string().optional() }).optional()).query(({ input }) => listPosts(input || {})),
+    seed: protectedProcedure.mutation(() => seedDemoData()),
+    addPost: protectedProcedure.input(postInput).mutation(({ input }) => addPost({ ...input, date: new Date(input.date) })),
+    strategy: protectedProcedure.input(z.object({ question: z.string().min(3) })).mutation(({ input }) => runStrategy(input.question)),
+    generateContent: protectedProcedure.input(z.object({ objective: z.string().min(1), topic: z.string().min(1), format: z.string().min(1), audience: z.string().min(1), tone: z.string().min(1) })).mutation(({ input }) => generateContent(input)),
+    memory: protectedProcedure.query(() => getMemoryOverview()),
+    searchMemory: protectedProcedure.input(z.object({ query: z.string().min(2) })).mutation(({ input }) => searchMemory(input.query)),
+    brand: protectedProcedure.query(() => getBrand()),
+    updateBrand: protectedProcedure.input(brandInput).mutation(({ input }) => updateBrand(input)),
+    instagramStatus: protectedProcedure.query(() => getInstagramStatus()),
+    syncInstagram: protectedProcedure.mutation(() => syncInstagramMedia()),
+    disconnectInstagram: protectedProcedure.mutation(() => disconnectInstagram()),
   }),
 });
 

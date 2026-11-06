@@ -7,7 +7,8 @@ export default function AuthCallback() {
   const [, setLocation] = useLocation();
   const { user, loading, recovery, error } = useSupabaseAuth();
   useEffect(() => {
-    if (recovery) setLocation("/reset-password");
+    const recoveryHash = window.location.hash.includes("type=recovery");
+    if (recovery || recoveryHash) setLocation("/reset-password");
     else if (!loading && user) setLocation("/");
     else if (!loading && error) setLocation(`/login?error=${encodeURIComponent(error)}`);
   }, [error, loading, recovery, setLocation, user]);
