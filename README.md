@@ -1,4 +1,4 @@
-[README (1).md](https://github.com/user-attachments/files/34488467/README.1.md)
+(https://github.com/user-attachments/files/34488467/README.1.md)
 <div align="center">
 
 # SocialMind AI 🧠
