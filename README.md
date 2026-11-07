@@ -109,18 +109,6 @@ Suppose a technology education brand posts tutorials, carousels, and short video
 
 The example illustrates the workflow; **actual recommendations depend on the user's data and connected services**.
 
-## ⚙️ How the application works
-
-Behind the interface, SocialMind follows an evidence-first processing pipeline:
-
-1. **Frontend input:** The React application accepts actions such as sign-in, post import, analytics viewing, strategy questions, and content-brief submission.
-2. **API request:** The frontend communicates with the Node.js/Express backend, primarily through typed **tRPC** operations; a separate REST interface serves integrations and other API clients.
-3. **Data loading:** The SocialMind service reads the brand profile and social-post history through **Drizzle ORM** from a **MySQL-compatible database**. When no database is configured, parts of the sample/demo flow can use a nonpersistent in-memory fallback.
-4. **Analytics calculation:** The backend calculates metrics and ranks topics, content types, posting windows, and individual posts using the stored history.
-5. **Memory retrieval (optional):** With valid Hindsight settings, the backend uses **RETAIN** for learning from outcomes, **RECALL** for finding relevant historical memories, and **REFLECT** for synthesizing lessons. The health status is checked against the real service.
-6. **Recommendation generation:** The backend provides brand information, computed analytics, and relevant evidence to its configured server-side LLM. If the LLM is unavailable, SocialMind returns an **analytics-derived fallback** rather than claiming a model generated the output.
-7. **Results rendered:** The frontend displays the strategy, content suggestion, supporting post evidence, confidence indicator, and integration status.
-8. **Feedback loop:** A newly added post can alter future analytics, recommendations, and retained memories.
 
 ### End-to-end processing flow
 
