@@ -14,6 +14,7 @@ export const users = mysqlTable("users", {
 
 export const brands = mysqlTable("brands", {
   id: int("id").autoincrement().primaryKey(),
+  workspaceKey: varchar("workspaceKey", { length: 128 }).notNull().default("legacy"),
   name: varchar("name", { length: 160 }).notNull(),
   industry: varchar("industry", { length: 160 }).notNull(),
   targetAudience: text("targetAudience").notNull(),
@@ -47,7 +48,8 @@ export const supabaseProfiles = mysqlTable("supabaseProfiles", {
 
 export const socialPosts = mysqlTable("socialPosts", {
   id: int("id").autoincrement().primaryKey(),
-  postId: varchar("postId", { length: 64 }).notNull().unique(),
+  workspaceKey: varchar("workspaceKey", { length: 128 }).notNull().default("legacy"),
+  postId: varchar("postId", { length: 64 }).notNull(),
   date: timestamp("date").notNull(),
   platform: varchar("platform", { length: 40 }).notNull(),
   topic: varchar("topic", { length: 120 }).notNull(),
@@ -66,6 +68,7 @@ export const socialPosts = mysqlTable("socialPosts", {
 
 export const memoryEvents = mysqlTable("memoryEvents", {
   id: int("id").autoincrement().primaryKey(),
+  workspaceKey: varchar("workspaceKey", { length: 128 }).notNull().default("legacy"),
   operation: mysqlEnum("operation", ["retain", "recall", "reflect"]).notNull(),
   status: varchar("status", { length: 40 }).notNull(),
   summary: text("summary").notNull(),

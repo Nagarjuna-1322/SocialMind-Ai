@@ -36,6 +36,7 @@ type SocialPost = {
 };
 
 type MemoryItem = { id?: string; text: string; type?: string; date?: string; sourcePostIds?: string[] };
+type WorkspaceKey = string;
 
 const defaultBrand: BrandProfile = {
   name: "TechNova",
@@ -218,11 +219,12 @@ function readSeedPosts(): SocialPost[] {
   });
 }
 
-async function recordMemoryEvent(event: { operation: "retain" | "recall" | "reflect"; status: string; summary: string; query?: string; sourcePostIds?: string[] }) {
+async function recordMemoryEvent(event: { operation: "retain" | "recall" | "reflect"; status: string; summary: string; query?: string; sourcePostIds?: string[] }, workspaceKey = "legacy") {
   const db = await getDb();
   const source = event.sourcePostIds?.join(",") || null;
   if (db) {
     await db.insert(memoryEvents).values({
+      workspaceKey,
       operation: event.operation,
       status: event.status,
       summary: event.summary,
@@ -234,12 +236,13 @@ async function recordMemoryEvent(event: { operation: "retain" | "recall" | "refl
   }
 }
 
-async function ensureBrand(): Promise<BrandProfile> {
+async function ensureBrand(workspaceKey: WorkspaceKey = "legacy"): Promise<BrandProfile> {
   const db = await getDb();
   if (!db) return fallback.brand;
-  const rows = await db.select().from(brands).limit(1);
+  const rows = await db.select().from(brands).where(eq(brands.workspaceKey, workspaceKey)).limit(1);
   if (rows[0]) return brandFromRow(rows[0]);
   const inserted = await db.insert(brands).values({
+    workspaceKey,
     name: defaultBrand.name,
     industry: defaultBrand.industry,
     targetAudience: defaultBrand.targetAudience,
@@ -251,30 +254,31 @@ async function ensureBrand(): Promise<BrandProfile> {
   return { ...defaultBrand, id: Number(inserted[0]?.insertId || 1) };
 }
 
-async function getPostsInternal() {
+async function getPostsInternal(workspaceKey: WorkspaceKey = "legacy") {
   const db = await getDb();
   if (!db) {
     if (!fallbackSeeded) fallback.posts.push(...readSeedPosts());
     fallbackSeeded = true;
     return fallback.posts;
   }
-  const rows = await db.select().from(socialPosts).orderBy(desc(socialPosts.date));
+  const rows = await db.select().from(socialPosts).where(eq(socialPosts.workspaceKey, workspaceKey)).orderBy(desc(socialPosts.date));
   return rows.map(postFromRow);
 }
 
-export async function getBrand() {
-  return ensureBrand();
+export async function getBrand(workspaceKey: WorkspaceKey = "legacy") {
+  return ensureBrand(workspaceKey);
 }
 
-export async function updateBrand(input: BrandProfile) {
+export async function updateBrand(input: BrandProfile, workspaceKey: WorkspaceKey = "legacy") {
   const db = await getDb();
   let saved: BrandProfile;
   if (!db) {
     fallback.brand = { ...fallback.brand, ...input };
     saved = fallback.brand;
   } else {
-    const existing = await db.select().from(brands).limit(1);
+    const existing = await db.select().from(brands).where(eq(brands.workspaceKey, workspaceKey)).limit(1);
     const payload = {
+      workspaceKey,
       name: input.name,
       industry: input.industry,
       targetAudience: input.targetAudience,
@@ -293,21 +297,21 @@ export async function updateBrand(input: BrandProfile) {
   }
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Brand profile ${saved.name} was saved, but Hindsight is not configured.` });
+    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Brand profile ${saved.name} was saved, but Hindsight is not configured.` }, workspaceKey);
   } else {
     try {
       await memory.retain(hindsightBankId, `Brand profile for ${saved.name}: industry ${saved.industry}; target audience ${saved.targetAudience}; tone ${saved.brandTone}; platforms ${saved.platforms.join(", ")}; goals ${saved.contentGoals.join(", ")}; preferred formats ${saved.preferredFormats.join(", ")}.`, { context: "Stable brand preference", documentId: "brand-profile", tags: ["brand-profile", "preference"] });
-      await recordMemoryEvent({ operation: "retain", status: "retained", summary: `Brand profile ${saved.name} retained in Hindsight.` });
+      await recordMemoryEvent({ operation: "retain", status: "retained", summary: `Brand profile ${saved.name} retained in Hindsight.` }, workspaceKey);
     } catch (error) {
       console.warn("[Hindsight] brand profile retain failed", error instanceof Error ? error.message : "unknown error");
-      await recordMemoryEvent({ operation: "retain", status: "error", summary: `Brand profile ${saved.name} was saved, but Hindsight retain failed.` });
+      await recordMemoryEvent({ operation: "retain", status: "error", summary: `Brand profile ${saved.name} was saved, but Hindsight retain failed.` }, workspaceKey);
     }
   }
   return saved;
 }
 
-export async function listPosts(filters: { platform?: string; topic?: string; contentType?: string; search?: string } = {}) {
-  const posts = await getPostsInternal();
+export async function listPosts(filters: { platform?: string; topic?: string; contentType?: string; search?: string } = {}, workspaceKey: WorkspaceKey = "legacy") {
+  const posts = await getPostsInternal(workspaceKey);
   return posts.filter(post => {
     if (filters.platform && filters.platform !== "all" && post.platform !== filters.platform) return false;
     if (filters.topic && filters.topic !== "all" && post.topic !== filters.topic) return false;
@@ -320,20 +324,21 @@ export async function listPosts(filters: { platform?: string; topic?: string; co
   });
 }
 
-export async function seedDemoData() {
+export async function seedDemoData(workspaceKey: WorkspaceKey = "legacy") {
   const seedPosts = readSeedPosts();
   const db = await getDb();
-  const brand = await ensureBrand();
+  const brand = await ensureBrand(workspaceKey);
   if (!seedPosts.length) return { created: 0, retained: false, memoryStatus: "unavailable" as const };
   if (!db) {
     if (!fallback.posts.length) fallback.posts.push(...seedPosts);
     fallbackSeeded = true;
   } else {
-    const existing = await db.select({ postId: socialPosts.postId }).from(socialPosts);
+    const existing = await db.select({ postId: socialPosts.postId }).from(socialPosts).where(eq(socialPosts.workspaceKey, workspaceKey));
     const existingIds = new Set(existing.map(row => row.postId));
     const missing = seedPosts.filter(post => !existingIds.has(post.postId));
     if (missing.length) {
       await db.insert(socialPosts).values(missing.map(post => ({
+        workspaceKey,
         postId: post.postId,
         date: post.date,
         platform: post.platform,
@@ -353,7 +358,7 @@ export async function seedDemoData() {
   }
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Loaded ${seedPosts.length} historical posts into the database; Hindsight is not configured.` });
+    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Loaded ${seedPosts.length} historical posts into the database; Hindsight is not configured.` }, workspaceKey);
     return { created: seedPosts.length, retained: false, memoryStatus: "unavailable" as const };
   }
   try {
@@ -373,24 +378,24 @@ export async function seedDemoData() {
         tags: ["social-post", post.platform.toLowerCase(), post.topic.toLowerCase().replace(/\s+/g, "-")],
       })),
     ], { async: true });
-    await recordMemoryEvent({ operation: "retain", status: "retained", summary: `Retain requested for ${seedPosts.length} historical posts and brand preferences in Hindsight.`, sourcePostIds: seedPosts.slice(0, 8).map(post => post.postId) });
+    await recordMemoryEvent({ operation: "retain", status: "retained", summary: `Retain requested for ${seedPosts.length} historical posts and brand preferences in Hindsight.`, sourcePostIds: seedPosts.slice(0, 8).map(post => post.postId) }, workspaceKey);
     return { created: seedPosts.length, retained: true, memoryStatus: "connected" as const };
   } catch (error) {
     console.warn("[Hindsight] retain batch failed", error instanceof Error ? error.message : "unknown error");
-    await recordMemoryEvent({ operation: "retain", status: "error", summary: "Database import succeeded, but Hindsight retain failed. Check Hindsight credentials and service health." });
+    await recordMemoryEvent({ operation: "retain", status: "error", summary: "Database import succeeded, but Hindsight retain failed. Check Hindsight credentials and service health." }, workspaceKey);
     return { created: seedPosts.length, retained: false, memoryStatus: "error" as const };
   }
 }
 
-async function ensureSeeded() {
+async function ensureSeeded(workspaceKey: WorkspaceKey = "legacy") {
   const db = await getDb();
   if (!db) {
-    if (!fallback.posts.length) await seedDemoData();
+    if (!fallback.posts.length) await seedDemoData(workspaceKey);
     return;
   }
-  const rows = await db.select({ id: socialPosts.id }).from(socialPosts).limit(1);
+  const rows = await db.select({ id: socialPosts.id }).from(socialPosts).where(eq(socialPosts.workspaceKey, workspaceKey)).limit(1);
   if (rows.length) return;
-  if (!bootstrapPromise) bootstrapPromise = seedDemoData().then(() => undefined).finally(() => { bootstrapPromise = null; });
+  if (!bootstrapPromise) bootstrapPromise = seedDemoData(workspaceKey).then(() => undefined).finally(() => { bootstrapPromise = null; });
   await bootstrapPromise;
 }
 
@@ -455,38 +460,38 @@ export function extractPostIds(text: string) {
   return Array.from(new Set(text.match(/\bP[A-Z0-9_-]*\d[A-Z0-9_-]*\b/gi) || []));
 }
 
-async function recallMemory(query: string): Promise<{ status: "connected" | "unavailable" | "error"; items: MemoryItem[]; text?: string }> {
+async function recallMemory(query: string, workspaceKey = "legacy"): Promise<{ status: "connected" | "unavailable" | "error"; items: MemoryItem[]; text?: string }> {
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "recall", status: "unavailable", summary: "Memory service unavailable; no Hindsight recall was performed.", query });
+    await recordMemoryEvent({ operation: "recall", status: "unavailable", summary: "Memory service unavailable; no Hindsight recall was performed.", query }, workspaceKey);
     return { status: "unavailable", items: [] };
   }
   try {
     const result = await memory.recall(hindsightBankId, query, { budget: "mid", maxTokens: 3000, includeChunks: true });
     const items = (result.results || []).slice(0, 8).map(item => ({ id: item.id, text: item.text || "", type: item.type ?? undefined, date: item.occurred_start ?? undefined, sourcePostIds: extractPostIds(item.text || "") }));
-    await recordMemoryEvent({ operation: "recall", status: "retrieved", summary: `Retrieved ${items.length} Hindsight memories for “${query}”.`, query, sourcePostIds: items.flatMap(item => item.sourcePostIds || []) });
+    await recordMemoryEvent({ operation: "recall", status: "retrieved", summary: `Retrieved ${items.length} Hindsight memories for “${query}”.`, query, sourcePostIds: items.flatMap(item => item.sourcePostIds || []) }, workspaceKey);
     return { status: "connected", items };
   } catch (error) {
     console.warn("[Hindsight] recall failed", error instanceof Error ? error.message : "unknown error");
-    await recordMemoryEvent({ operation: "recall", status: "error", summary: "Hindsight recall failed; the strategy response is marked with a memory error.", query });
+    await recordMemoryEvent({ operation: "recall", status: "error", summary: "Hindsight recall failed; the strategy response is marked with a memory error.", query }, workspaceKey);
     return { status: "error", items: [] };
   }
 }
 
-async function reflectMemory(query: string) {
+async function reflectMemory(query: string, workspaceKey = "legacy") {
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "reflect", status: "unavailable", summary: "Memory service unavailable; no Hindsight reflect was performed.", query });
+    await recordMemoryEvent({ operation: "reflect", status: "unavailable", summary: "Memory service unavailable; no Hindsight reflect was performed.", query }, workspaceKey);
     return { status: "unavailable" as const, text: "" };
   }
   try {
     const result = await memory.reflect(hindsightBankId, query, { budget: "low", includeFacts: true });
     const sourcePostIds = (result.based_on?.memories || []).flatMap((item: { text: string }) => extractPostIds(item.text));
-    await recordMemoryEvent({ operation: "reflect", status: "synthesized", summary: "Hindsight reflect synthesized a strategy answer from retained brand memories.", query, sourcePostIds });
+    await recordMemoryEvent({ operation: "reflect", status: "synthesized", summary: "Hindsight reflect synthesized a strategy answer from retained brand memories.", query, sourcePostIds }, workspaceKey);
     return { status: "connected" as const, text: result.text || "" };
   } catch (error) {
     console.warn("[Hindsight] reflect failed", error instanceof Error ? error.message : "unknown error");
-    await recordMemoryEvent({ operation: "reflect", status: "error", summary: "Hindsight reflect failed; the strategy response is marked with a memory error.", query });
+    await recordMemoryEvent({ operation: "reflect", status: "error", summary: "Hindsight reflect failed; the strategy response is marked with a memory error.", query }, workspaceKey);
     return { status: "error" as const, text: "" };
   }
 }
@@ -518,12 +523,12 @@ async function generateWithLLM<T>(prompt: string, schema: Record<string, unknown
   }
 }
 
-export async function runStrategy(question: string) {
-  await ensureSeeded();
-  const [brand, posts] = await Promise.all([getBrand(), getPostsInternal()]);
+export async function runStrategy(question: string, workspaceKey: WorkspaceKey = "legacy") {
+  await ensureSeeded(workspaceKey);
+  const [brand, posts] = await Promise.all([getBrand(workspaceKey), getPostsInternal(workspaceKey)]);
   const analytics = calculateAnalytics(posts);
-  const recall = await recallMemory(question);
-  const reflect = await reflectMemory(`${question}\nBrand: ${brand.name}; audience: ${brand.targetAudience}; tone: ${brand.brandTone}.`);
+  const recall = await recallMemory(question, workspaceKey);
+  const reflect = await reflectMemory(`${question}\nBrand: ${brand.name}; audience: ${brand.targetAudience}; tone: ${brand.brandTone}.`, workspaceKey);
   const evidence = recall.items.length ? recall.items : analytics.topPosts.slice(0, 4).map(post => ({ id: post.postId, text: `${post.postId}: ${post.topic} ${post.contentType} at ${post.engagementRate.toFixed(2)}% engagement; ${post.audienceResponse}`, type: "database-evidence", sourcePostIds: [post.postId] }));
   const prompt = `Question: ${question}\nBrand: ${JSON.stringify(brand)}\nAnalytics: ${JSON.stringify({ averageEngagementRate: analytics.averageEngagementRate, bestTopic: analytics.bestTopic, bestContentType: analytics.bestContentType, topicPerformance: analytics.topicPerformance.slice(0, 5), contentTypePerformance: analytics.contentTypePerformance.slice(0, 5), postingTimePerformance: analytics.postingTimePerformance.slice(0, 5) })}\nHindsight recall evidence: ${JSON.stringify(recall.items)}\nHindsight reflect: ${reflect.text}\nReturn a concise, actionable recommendation for next week.`;
   const llm = await generateWithLLM<{
@@ -570,13 +575,13 @@ export async function runStrategy(question: string) {
   };
 }
 
-export async function generateContent(input: { objective: string; topic: string; format: string; audience: string; tone: string }) {
-  await ensureSeeded();
-  const brand = await getBrand();
-  const posts = await getPostsInternal();
+export async function generateContent(input: { objective: string; topic: string; format: string; audience: string; tone: string }, workspaceKey: WorkspaceKey = "legacy") {
+  await ensureSeeded(workspaceKey);
+  const brand = await getBrand(workspaceKey);
+  const posts = await getPostsInternal(workspaceKey);
   const analytics = calculateAnalytics(posts);
   const query = `Generate a ${input.format} post about ${input.topic} for ${input.audience}. Objective: ${input.objective}. Tone: ${input.tone}. Use historical audience responses and high-performing posts.`;
-  const recall = await recallMemory(query);
+  const recall = await recallMemory(query, workspaceKey);
   const evidence = recall.items.length ? recall.items : analytics.topPosts.slice(0, 3).map(post => ({ id: post.postId, text: `${post.postId} performed at ${post.engagementRate.toFixed(2)}% engagement. Audience: ${post.audienceResponse}`, sourcePostIds: [post.postId] }));
   const llm = await generateWithLLM<{ hook: string; caption: string; cta: string; hashtags: string[]; timing: string; why: string }>(`${query}\nBrand profile: ${JSON.stringify(brand)}\nEvidence: ${JSON.stringify(evidence)}`, {
     type: "object",
@@ -594,7 +599,7 @@ export async function generateContent(input: { objective: string; topic: string;
   return { ...fallbackContent, ...(llm || {}), topic: input.topic, format: input.format, memoryStatus: recall.status, memoryUsed: evidence };
 }
 
-export async function addPost(input: Omit<SocialPost, "id" | "engagementRate"> & { engagementRate?: number }) {
+export async function addPost(input: Omit<SocialPost, "id" | "engagementRate"> & { engagementRate?: number }, workspaceKey: WorkspaceKey = "legacy") {
   const reach = Math.max(0, Number(input.reach || 0));
   const engagementRate = input.engagementRate ?? (reach ? ((input.likes + input.comments + input.shares) / reach) * 100 : 0);
   const post: SocialPost = { ...input, engagementRate, date: new Date(input.date) };
@@ -603,30 +608,30 @@ export async function addPost(input: Omit<SocialPost, "id" | "engagementRate"> &
     if (fallback.posts.some(item => item.postId === post.postId)) throw new Error("A post with this ID already exists.");
     fallback.posts.unshift(post);
   } else {
-    await db.insert(socialPosts).values(post);
+    await db.insert(socialPosts).values({ ...post, workspaceKey });
   }
-  const brand = await getBrand();
+  const brand = await getBrand(workspaceKey);
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Post ${post.postId} was saved, but Hindsight is not configured.`, sourcePostIds: [post.postId] });
+    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: `Post ${post.postId} was saved, but Hindsight is not configured.`, sourcePostIds: [post.postId] }, workspaceKey);
   } else {
     try {
       await memory.retain(hindsightBankId, `${brand.name} published post ${post.postId} on ${post.date.toISOString().slice(0, 10)} on ${post.platform}. Topic: ${post.topic}. Format: ${post.contentType}. It received ${post.views} views, ${post.reach} reach, ${post.likes} likes, ${post.comments} comments and ${post.shares} shares, for ${post.engagementRate.toFixed(2)}% engagement. Audience response: ${post.audienceResponse}`, { context: "New post performance outcome", documentId: post.postId, timestamp: post.date, metadata: { post_id: post.postId, platform: post.platform, topic: post.topic, content_type: post.contentType }, tags: ["social-post", "new-learning"] });
-      await recordMemoryEvent({ operation: "retain", status: "retained", summary: `New outcome for ${post.postId} retained in Hindsight.`, sourcePostIds: [post.postId] });
+      await recordMemoryEvent({ operation: "retain", status: "retained", summary: `New outcome for ${post.postId} retained in Hindsight.`, sourcePostIds: [post.postId] }, workspaceKey);
     } catch (error) {
       console.warn("[Hindsight] new post retain failed", error instanceof Error ? error.message : "unknown error");
-      await recordMemoryEvent({ operation: "retain", status: "error", summary: `Post ${post.postId} was saved, but Hindsight retain failed.`, sourcePostIds: [post.postId] });
+      await recordMemoryEvent({ operation: "retain", status: "error", summary: `Post ${post.postId} was saved, but Hindsight retain failed.`, sourcePostIds: [post.postId] }, workspaceKey);
     }
   }
   return post;
 }
 
-export async function getMemoryOverview() {
+export async function getMemoryOverview(workspaceKey: WorkspaceKey = "legacy") {
   await ensureSeeded();
   const db = await getDb();
   let events: Array<{ id: number; operation: "retain" | "recall" | "reflect"; status: string; summary: string; query?: string | null; sourcePostIds?: string[]; createdAt: Date }> = [];
   if (db) {
-    const rows = await db.select().from(memoryEvents).orderBy(desc(memoryEvents.createdAt)).limit(20);
+    const rows = await db.select().from(memoryEvents).where(eq(memoryEvents.workspaceKey, workspaceKey)).orderBy(desc(memoryEvents.createdAt)).limit(20);
     events = rows.map(row => ({ ...row, sourcePostIds: row.sourcePostIds ? row.sourcePostIds.split(",").filter(Boolean) : [] }));
   } else {
     events = fallback.events.slice(0, 20);
@@ -647,15 +652,15 @@ export async function getMemoryOverview() {
   return { status, bankId: hindsightBankId, configured: hindsightConfigured, events, memories, learnedObservations, count: memories.length, lifecycle: ["RETAIN", "RECALL", "REFLECT"] };
 }
 
-export async function searchMemory(query: string) {
-  const result = await recallMemory(query);
+export async function searchMemory(query: string, workspaceKey: WorkspaceKey = "legacy") {
+  const result = await recallMemory(query, workspaceKey);
   return { ...result, query };
 }
 
-export async function retainMemory(input: { content: string; context?: string; documentId?: string; sourcePostIds?: string[] }) {
+export async function retainMemory(input: { content: string; context?: string; documentId?: string; sourcePostIds?: string[] }, workspaceKey: WorkspaceKey = "legacy") {
   const memory = await verifyHindsightBank();
   if (!memory) {
-    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: "Memory service unavailable; no Hindsight retain was performed.", sourcePostIds: input.sourcePostIds });
+    await recordMemoryEvent({ operation: "retain", status: "unavailable", summary: "Memory service unavailable; no Hindsight retain was performed.", sourcePostIds: input.sourcePostIds }, workspaceKey);
     return { status: "unavailable" as const, retained: false, bankId: hindsightBankId };
   }
   try {
@@ -664,20 +669,20 @@ export async function retainMemory(input: { content: string; context?: string; d
       documentId: input.documentId,
       tags: ["socialmind", "manual-retain"],
     });
-    await recordMemoryEvent({ operation: "retain", status: "retained", summary: "Memory retained in Hindsight.", sourcePostIds: input.sourcePostIds });
+    await recordMemoryEvent({ operation: "retain", status: "retained", summary: "Memory retained in Hindsight.", sourcePostIds: input.sourcePostIds }, workspaceKey);
     return { status: "connected" as const, retained: true, bankId: hindsightBankId };
   } catch (error) {
-    await recordMemoryEvent({ operation: "retain", status: "error", summary: `Hindsight retain failed: ${error instanceof Error ? error.message : "unknown error"}`, sourcePostIds: input.sourcePostIds });
+    await recordMemoryEvent({ operation: "retain", status: "error", summary: `Hindsight retain failed: ${error instanceof Error ? error.message : "unknown error"}`, sourcePostIds: input.sourcePostIds }, workspaceKey);
     return { status: "error" as const, retained: false, bankId: hindsightBankId };
   }
 }
 
-export async function reflect(query: string) {
-  return reflectMemory(query);
+export async function reflect(query: string, workspaceKey: WorkspaceKey = "legacy") {
+  return reflectMemory(query, workspaceKey);
 }
 
-export async function getDashboard() {
-  await ensureSeeded();
-  const [brand, posts] = await Promise.all([getBrand(), getPostsInternal()]);
-  return { brand, analytics: calculateAnalytics(posts), recentPosts: posts.slice(0, 6), memory: await getMemoryOverview() };
+export async function getDashboard(workspaceKey: WorkspaceKey = "legacy") {
+  await ensureSeeded(workspaceKey);
+  const [brand, posts] = await Promise.all([getBrand(workspaceKey), getPostsInternal(workspaceKey)]);
+  return { brand, analytics: calculateAnalytics(posts), recentPosts: posts.slice(0, 6), memory: await getMemoryOverview(workspaceKey) };
 }

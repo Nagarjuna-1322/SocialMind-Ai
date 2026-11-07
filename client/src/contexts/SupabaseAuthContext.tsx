@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { loadSupabaseClient } from "@/lib/supabase";
+import { getAuthRedirectUrl, loadSupabaseClient } from "@/lib/supabase";
 
 type AuthResult = { error: string | null };
 type SupabaseAuthContextValue = {
@@ -79,25 +79,25 @@ export function SupabaseAuthProvider({ children }: { children: React.ReactNode }
     },
     signUp: async (email, password) => {
       try {
-        const result = await (await loadSupabaseClient()).auth.signUp({ email, password, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+        const result = await (await loadSupabaseClient()).auth.signUp({ email, password, options: { emailRedirectTo: getAuthRedirectUrl() } });
         return { error: result.error?.message ?? null, needsEmailConfirmation: !result.data.session };
       } catch (nextError) { return { error: messageFor(nextError), needsEmailConfirmation: false }; }
     },
     signInWithOAuth: async provider => {
       try {
-        const result = await (await loadSupabaseClient()).auth.signInWithOAuth({ provider, options: { redirectTo: `${window.location.origin}/auth/callback` } });
+        const result = await (await loadSupabaseClient()).auth.signInWithOAuth({ provider, options: { redirectTo: getAuthRedirectUrl() } });
         return { error: result.error?.message ?? null };
       } catch (nextError) { return { error: messageFor(nextError) }; }
     },
     resetPassword: async email => {
       try {
-        const result = await (await loadSupabaseClient()).auth.resetPasswordForEmail(email, { redirectTo: `${window.location.origin}/auth/callback` });
+        const result = await (await loadSupabaseClient()).auth.resetPasswordForEmail(email, { redirectTo: getAuthRedirectUrl() });
         return { error: result.error?.message ?? null };
       } catch (nextError) { return { error: messageFor(nextError) }; }
     },
     resendVerification: async email => {
       try {
-        const result = await (await loadSupabaseClient()).auth.resend({ type: "signup", email, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
+        const result = await (await loadSupabaseClient()).auth.resend({ type: "signup", email, options: { emailRedirectTo: getAuthRedirectUrl() } });
         return { error: result.error?.message ?? null };
       } catch (nextError) { return { error: messageFor(nextError) }; }
     },

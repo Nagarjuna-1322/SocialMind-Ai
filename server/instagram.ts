@@ -4,6 +4,7 @@ import * as cookie from "cookie";
 import { addPost } from "./socialmind";
 import { deleteInstagramConnection, getInstagramConnection, upsertInstagramConnection, upsertInstagramPost } from "./db";
 import { ENV } from "./_core/env";
+import { getSupabaseClaims } from "./supabase-auth";
 import type { InsertSocialPost } from "../drizzle/schema";
 
 const WORKSPACE_KEY = process.env.INSTAGRAM_WORKSPACE_KEY || "technova";
@@ -89,18 +90,20 @@ async function exchangeCode(code: string) {
   return { accessToken: String(longBody.access_token), userId, expiresIn: Number(longBody.expires_in || 0) };
 }
 
-export async function getInstagramStatus() {
-  const connection = await getInstagramConnection(WORKSPACE_KEY);
+export async function getInstagramStatus(workspaceKey = WORKSPACE_KEY) {
+  const connection = await getInstagramConnection(workspaceKey);
   if (!connection) return { configured: isConfigured(), connected: false, status: isConfigured() ? "not_connected" : "not_configured", username: null, accountType: null, lastSyncedAt: null, postCount: 0 };
   return { configured: isConfigured(), connected: true, status: "connected", username: connection.username, accountType: connection.accountType, lastSyncedAt: connection.lastSyncedAt, postCount: 0 };
 }
 
 export function registerInstagramRoutes(app: Express) {
-  app.get("/api/instagram/connect", (req: Request, res: Response) => {
+  app.get("/api/instagram/connect", async (req: Request, res: Response) => {
     try {
       requireConfigured();
+      const claims = await getSupabaseClaims(req);
+      if (!claims) { res.status(401).json({ error: "Sign in before connecting Instagram." }); return; }
       const state = randomBytes(24).toString("base64url");
-      res.setHeader("Set-Cookie", serializeStateCookie(state, cookieOptions(req, STATE_MAX_AGE)));
+      res.setHeader("Set-Cookie", serializeStateCookie(`${state}.${claims.id}`, cookieOptions(req, STATE_MAX_AGE)));
       const url = new URL(OAUTH_BASE);
       url.searchParams.set("client_id", ENV.instagramAppId);
       url.searchParams.set("redirect_uri", ENV.instagramRedirectUri);
@@ -108,7 +111,7 @@ export function registerInstagramRoutes(app: Express) {
       url.searchParams.set("scope", REQUIRED_SCOPES.join(","));
       url.searchParams.set("state", state);
       url.searchParams.set("force_reauth", "false");
-      res.redirect(302, url.toString());
+      res.json({ url: url.toString() });
     } catch (error) {
       res.status(503).json({ error: error instanceof Error ? error.message : "Instagram is not configured" });
     }
@@ -119,7 +122,9 @@ export function registerInstagramRoutes(app: Express) {
     const cookies = cookie.parse(req.headers.cookie || "");
     const state = query.state;
     const code = query.code;
-    if (!state || state !== cookies[STATE_COOKIE]) {
+    const storedState = cookies[STATE_COOKIE] || "";
+    const [expectedState, workspaceKey] = storedState.split(".");
+    if (!state || state !== expectedState || !workspaceKey) {
       res.status(403).send("Instagram connection could not be verified. Please try again.");
       return;
     }
@@ -136,7 +141,7 @@ export function registerInstagramRoutes(app: Express) {
       requireConfigured();
       const token = await exchangeCode(code);
       const profile = await instagramFetch<InstagramProfile>(`/${token.userId}?fields=id,username,account_type,media_count`, token.accessToken);
-      await upsertInstagramConnection({ workspaceKey: WORKSPACE_KEY, instagramUserId: token.userId, username: profile.username || `Instagram user ${token.userId}`, accountType: profile.account_type || null, accessTokenEncrypted: encryptToken(token.accessToken), tokenExpiresAt: token.expiresIn ? new Date(Date.now() + token.expiresIn * 1000) : null, lastSyncedAt: null });
+      await upsertInstagramConnection({ workspaceKey, instagramUserId: token.userId, username: profile.username || `Instagram user ${token.userId}`, accountType: profile.account_type || null, accessTokenEncrypted: encryptToken(token.accessToken), tokenExpiresAt: token.expiresIn ? new Date(Date.now() + token.expiresIn * 1000) : null, lastSyncedAt: null });
       res.redirect(302, "/settings?instagram=connected");
     } catch (error) {
       console.error("[Instagram] OAuth callback failed", error instanceof Error ? error.message : "unknown error");
@@ -160,9 +165,9 @@ export function registerInstagramRoutes(app: Express) {
   });
 }
 
-export async function syncInstagramMedia() {
+export async function syncInstagramMedia(workspaceKey = WORKSPACE_KEY) {
   requireConfigured();
-  const connection = await getInstagramConnection(WORKSPACE_KEY);
+  const connection = await getInstagramConnection(workspaceKey);
   if (!connection) throw new Error("Connect an Instagram professional account before syncing posts.");
   const token = decryptToken(connection.accessTokenEncrypted);
   const mediaResponse = await instagramFetch<{ data?: InstagramMedia[] }>(`/${connection.instagramUserId}/media?fields=id,caption,media_type,timestamp,like_count,comments_count,permalink&limit=50`, token);
@@ -178,15 +183,15 @@ export async function syncInstagramMedia() {
     const likes = Number(item.like_count || 0);
     const comments = Number(item.comments_count || 0);
     const post: InsertSocialPost = { postId, date, platform: "Instagram", topic, contentType, caption, views: 0, reach: 0, likes, comments, shares: 0, engagementRate: 0, postingTime: date.toISOString().slice(11, 16), audienceResponse: `Imported from @${connection.username}. Likes and comments are available from Instagram; reach and shares require an approved insights scope.`, createdAt: new Date() };
-    await upsertInstagramPost(post);
+    await upsertInstagramPost({ ...post, workspaceKey });
     imported += 1;
   }
   const now = new Date();
-  await upsertInstagramConnection({ workspaceKey: WORKSPACE_KEY, instagramUserId: connection.instagramUserId, username: connection.username, accountType: connection.accountType, accessTokenEncrypted: connection.accessTokenEncrypted, tokenExpiresAt: connection.tokenExpiresAt, lastSyncedAt: now });
+  await upsertInstagramConnection({ workspaceKey, instagramUserId: connection.instagramUserId, username: connection.username, accountType: connection.accountType, accessTokenEncrypted: connection.accessTokenEncrypted, tokenExpiresAt: connection.tokenExpiresAt, lastSyncedAt: now });
   return { success: true, imported, syncedAt: now, username: connection.username, note: "Instagram posts are now part of SocialMind analytics. Reach and share metrics remain zero unless the account has approved insights access." };
 }
 
-export async function disconnectInstagram() {
-  await deleteInstagramConnection(WORKSPACE_KEY);
+export async function disconnectInstagram(workspaceKey = WORKSPACE_KEY) {
+  await deleteInstagramConnection(workspaceKey);
   return { success: true } as const;
 }

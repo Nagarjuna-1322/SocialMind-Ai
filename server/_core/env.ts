@@ -15,4 +15,5 @@ export const ENV = {
   supabasePublishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? "",
   supabaseJwksUrl: process.env.SUPABASE_JWKS_URL ?? "",
   supabaseSecretKey: process.env.SUPABASE_SECRET_KEY ?? "",
+  supabaseSiteUrl: process.env.SUPABASE_SITE_URL ?? "",
 };

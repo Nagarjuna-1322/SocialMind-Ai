@@ -41,6 +41,7 @@ export function createApp(options: { vercel?: boolean } = {}) {
   app.get("/api/auth/config", (_req, res) => res.json({
     url: ENV.supabaseUrl,
     publishableKey: ENV.supabasePublishableKey,
+    siteUrl: ENV.supabaseSiteUrl,
   }));
 
   app.get("/api/dashboard", asyncRoute(async (_req, res) => res.json(await getDashboard())));
