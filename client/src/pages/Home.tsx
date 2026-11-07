@@ -147,21 +147,21 @@ function EmptyState({ icon: Icon, title, description, action }: { icon: LucideIc
   return <div className="flex min-h-[220px] flex-col items-center justify-center px-6 py-10 text-center"><div className="mb-4 rounded-2xl bg-[#f0f1f7] p-3 text-[#7777ee]"><Icon className="h-6 w-6" /></div><h3 className="font-display text-lg font-semibold">{title}</h3><p className="mt-2 max-w-sm text-sm leading-6 text-[#7b7f91]">{description}</p>{action && <div className="mt-5">{action}</div>}</div>;
 }
 
-function Sidebar({ location, setLocation, open, setOpen }: { location: string; setLocation: (path: string) => void; open: boolean; setOpen: (value: boolean) => void }) {
+function Sidebar({ location, onNavigate, open, setOpen }: { location: string; onNavigate: (path: string) => void; open: boolean; setOpen: (value: boolean) => void }) {
   const groups = Array.from(new Set(navItems.map(item => item.group)));
   return (
     <>
       {open && <button aria-label="Close navigation" className="fixed inset-0 z-30 bg-[#101421]/45 lg:hidden" onClick={() => setOpen(false)} />}
       <aside className={`fixed inset-y-0 left-0 z-40 flex w-[264px] flex-col bg-[#151a28] text-white transition-transform duration-200 lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-[84px] items-center justify-between border-b border-[#2d3549] px-6">
-          <button className="flex items-center gap-3 text-left" onClick={() => { setLocation("/"); setOpen(false); }}>
+          <button className="flex items-center gap-3 text-left" onClick={() => { onNavigate("/"); setOpen(false); }}>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#7ee8c2] text-[#12201d]"><BrainCircuit className="h-5 w-5" /></div>
             <div><div className="font-display text-[17px] font-semibold tracking-[-0.04em]">SocialMind</div><div className="text-[10px] font-medium uppercase tracking-[0.18em] text-[#8f98ae]">AI strategist</div></div>
           </button>
           <button className="rounded-lg p-1.5 text-[#9da5ba] hover:bg-[#22293c] lg:hidden" onClick={() => setOpen(false)}><X className="h-4 w-4" /></button>
         </div>
         <div className="hide-scrollbar flex-1 overflow-y-auto px-3 py-5">
-          {groups.map(group => <div key={group} className="mb-6"><div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#727d96]">{group}</div><div className="space-y-1">{navItems.filter(item => item.group === group).map(item => { const active = location === item.path || (item.path === "/" && location === "/"); return <button key={item.path} onClick={() => { setLocation(item.path); setOpen(false); }} className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-[#272f45] font-semibold text-white" : "text-[#aeb6c9] hover:bg-[#20273a] hover:text-white"}`}><item.icon className={`h-[17px] w-[17px] ${active ? "text-[#7ee8c2]" : "text-[#7f89a2] group-hover:text-[#c2c8d6]"}`} /><span>{item.label}</span>{item.label === "AI memory" && <span className="ml-auto rounded-full bg-[#4b4f9e] px-1.5 py-0.5 text-[9px] font-bold text-[#e7e8ff]">NEW</span>}</button>; })}</div></div>)}
+          {groups.map(group => <div key={group} className="mb-6"><div className="px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-[#727d96]">{group}</div><div className="space-y-1">{navItems.filter(item => item.group === group).map(item => { const active = location === item.path || (item.path === "/" && location === "/"); return <button key={item.path} onClick={() => { onNavigate(item.path); setOpen(false); }} className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm transition-colors ${active ? "bg-[#272f45] font-semibold text-white" : "text-[#aeb6c9] hover:bg-[#20273a] hover:text-white"}`}><item.icon className={`h-[17px] w-[17px] ${active ? "text-[#7ee8c2]" : "text-[#7f89a2] group-hover:text-[#c2c8d6]"}`} /><span>{item.label}</span>{item.label === "AI memory" && <span className="ml-auto rounded-full bg-[#4b4f9e] px-1.5 py-0.5 text-[9px] font-bold text-[#e7e8ff]">NEW</span>}</button>; })}</div></div>)}
         </div>
         <div className="border-t border-[#2d3549] p-4"><div className="flex items-center gap-3 rounded-xl bg-[#20273a] p-3"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f3af6b] text-sm font-bold text-[#422814]">TN</div><div className="min-w-0 flex-1"><div className="truncate text-sm font-semibold">TechNova</div><div className="truncate text-xs text-[#9099ae]">Marketing workspace</div></div><ChevronDown className="h-4 w-4 text-[#7f89a2]" /></div></div>
       </aside>
@@ -169,8 +169,12 @@ function Sidebar({ location, setLocation, open, setOpen }: { location: string; s
   );
 }
 
-function Topbar({ title, setOpen, onAsk, onImport, importing, onSignOut }: { title: string; setOpen: (value: boolean) => void; onAsk: () => void; onImport: () => void; importing: boolean; onSignOut: () => void }) {
-  return <header className="flex min-h-[84px] items-center justify-between gap-4 border-b border-[#e8e9ef] bg-[#f7f8fb]/95 px-5 backdrop-blur sm:px-8"><div className="flex min-w-0 items-center gap-3"><button className="rounded-xl border border-[#e4e6ee] bg-white p-2 text-[#6f7486] lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button><div><div className="eyebrow mb-1 hidden sm:block">TechNova / Workspace</div><div className="font-display truncate text-xl font-semibold tracking-[-0.035em] text-[#20212d]">{title}</div></div></div><div className="flex items-center gap-2"><Button variant="outline" className="hidden h-10 gap-2 rounded-xl border-[#e3e5ed] bg-white px-3 text-xs font-semibold text-[#5a5e70] sm:flex" onClick={onImport} disabled={importing}><Upload className="h-3.5 w-3.5" />{importing ? "Loading…" : "Load sample data"}</Button><Button className="h-10 gap-2 rounded-xl bg-[#5b5ce2] px-3 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(91,92,226,0.18)] hover:bg-[#4e4fc9]" onClick={onAsk}><Sparkles className="h-3.5 w-3.5" />Ask AI</Button><Button variant="outline" className="h-10 gap-2 rounded-xl bg-white px-3 text-xs font-semibold text-[#6b6e7d]" onClick={onSignOut}><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></Button></div></header>;
+function Topbar({ title, setOpen, onAsk, onImport, importing, authenticated, onSignIn, onSignOut }: { title: string; setOpen: (value: boolean) => void; onAsk: () => void; onImport: () => void; importing: boolean; authenticated: boolean; onSignIn: () => void; onSignOut: () => void }) {
+  return <header className="flex min-h-[84px] items-center justify-between gap-4 border-b border-[#e8e9ef] bg-[#f7f8fb]/95 px-5 backdrop-blur sm:px-8"><div className="flex min-w-0 items-center gap-3"><button className="rounded-xl border border-[#e4e6ee] bg-white p-2 text-[#6f7486] lg:hidden" onClick={() => setOpen(true)}><Menu className="h-5 w-5" /></button><div><div className="eyebrow mb-1 hidden sm:block">TechNova / Marketing workspace</div><div className="font-display truncate text-xl font-semibold tracking-[-0.035em] text-[#20212d]">{title}</div></div></div><div className="flex items-center gap-2">{authenticated && <Button variant="outline" className="hidden h-10 gap-2 rounded-xl border-[#e3e5ed] bg-white px-3 text-xs font-semibold text-[#5a5e70] sm:flex" onClick={onImport} disabled={importing}><Upload className="h-3.5 w-3.5" />{importing ? "Loading…" : "Load sample data"}</Button>}{authenticated && <Button className="h-10 gap-2 rounded-xl bg-[#5b5ce2] px-3 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(91,92,226,0.18)] hover:bg-[#4e4fc9]" onClick={onAsk}><Sparkles className="h-3.5 w-3.5" />Ask AI</Button>}{authenticated ? <Button variant="outline" className="h-10 gap-2 rounded-xl bg-white px-3 text-xs font-semibold text-[#6b6e7d]" onClick={onSignOut}><LogOut className="h-3.5 w-3.5" /><span className="hidden sm:inline">Sign out</span></Button> : <Button className="h-10 rounded-xl bg-[#5b5ce2] px-4 text-xs font-semibold text-white shadow-[0_8px_18px_rgba(91,92,226,0.18)] hover:bg-[#4e4fc9]" onClick={onSignIn}>Sign in</Button>}</div></header>;
+}
+
+function PublicDashboardView({ onSignIn }: { onSignIn: () => void }) {
+  return <div className="socialmind-enter space-y-6"><div className="rounded-2xl bg-[#151a28] px-6 py-8 text-white shadow-[0_18px_45px_rgba(21,26,40,0.14)] sm:px-10 sm:py-10"><div className="max-w-2xl"><div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#7ee8c2]">Your private content command center</div><h1 className="font-display text-3xl font-semibold leading-tight tracking-[-0.04em] sm:text-5xl">Turn every post into a smarter next move.</h1><p className="mt-5 max-w-xl text-sm leading-7 text-[#b6bdcc]">Sign in to connect Instagram, view your own post performance, and build a content strategy grounded in your workspace history.</p><Button className="mt-6 rounded-xl bg-[#7ee8c2] px-5 font-semibold text-[#15231f] hover:bg-[#a0f2d0]" onClick={onSignIn}>Sign in to open your workspace <ArrowUpRight className="ml-2 h-4 w-4" /></Button></div></div><div className="grid gap-4 sm:grid-cols-3"><Panel className="p-5"><div className="eyebrow mb-3">Private analytics</div><div className="font-display text-lg font-semibold">Your posts only</div><p className="mt-2 text-sm leading-6 text-[#7b7f91]">Each account gets an isolated TechNova Marketing workspace.</p></Panel><Panel className="p-5"><div className="eyebrow mb-3">Instagram sync</div><div className="font-display text-lg font-semibold">Connect securely</div><p className="mt-2 text-sm leading-6 text-[#7b7f91]">Import and analyze your own Instagram content after sign-in.</p></Panel><Panel className="p-5"><div className="eyebrow mb-3">AI strategy</div><div className="font-display text-lg font-semibold">Plan with confidence</div><p className="mt-2 text-sm leading-6 text-[#7b7f91]">Generate recommendations from your workspace history and brand profile.</p></Panel></div></div>;
 }
 
 function DashboardView({ data, onNavigate }: { data: any; onNavigate: (path: string) => void }) {
@@ -245,7 +249,7 @@ function SettingsView({ memory, instagram, onImport, importing, onConnectInstagr
 }
 
 export default function Home() {
-  const { signOut } = useSupabaseAuth();
+  const { user, signOut } = useSupabaseAuth();
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filters, setFilters] = useState({ platform: "all", topic: "all", contentType: "all", search: "" });
@@ -253,12 +257,12 @@ export default function Home() {
   const [strategy, setStrategy] = useState<any>(null);
   const [generatorForm, setGeneratorForm] = useState({ objective: "Educate the audience", topic: "Generative AI", format: "Tutorial", audience: "Developers and technology professionals", tone: "Professional, educational, practical" });
   const [generatedContent, setGeneratedContent] = useState<any>(null);
-  const dashboardQuery = trpc.socialmind.dashboard.useQuery();
+  const dashboardQuery = trpc.socialmind.dashboard.useQuery(undefined, { enabled: Boolean(user) });
   const postFilters = useMemo(() => filters, [filters]);
-  const postsQuery = trpc.socialmind.posts.useQuery(postFilters);
-  const memoryQuery = trpc.socialmind.memory.useQuery();
-  const brandQuery = trpc.socialmind.brand.useQuery();
-  const instagramQuery = trpc.socialmind.instagramStatus.useQuery();
+  const postsQuery = trpc.socialmind.posts.useQuery(postFilters, { enabled: Boolean(user) });
+  const memoryQuery = trpc.socialmind.memory.useQuery(undefined, { enabled: Boolean(user) });
+  const brandQuery = trpc.socialmind.brand.useQuery(undefined, { enabled: Boolean(user) });
+  const instagramQuery = trpc.socialmind.instagramStatus.useQuery(undefined, { enabled: Boolean(user) });
   const utils = trpc.useUtils();
   const invalidateAll = () => { void utils.socialmind.dashboard.invalidate(); void utils.socialmind.posts.invalidate(); void utils.socialmind.memory.invalidate(); void utils.socialmind.brand.invalidate(); void utils.socialmind.instagramStatus.invalidate(); };
   const seedMutation = trpc.socialmind.seed.useMutation({ onSuccess: result => { toast.success(`${result.created || 0} sample posts loaded`); invalidateAll(); }, onError: error => toast.error(error.message) });
@@ -281,12 +285,17 @@ export default function Home() {
     } catch (error) { toast.error(error instanceof Error ? error.message : "Instagram connection could not be started."); }
   };
   const title = navItems.find(item => item.path === location)?.label || "Dashboard";
+  const navigate = (path: string) => {
+    if (!user && path !== "/") { setLocation("/login"); return; }
+    setLocation(path);
+  };
   const dashboard = dashboardQuery.data;
   const handleAdd = (input: any) => addPostMutation.mutate(input);
   const activeMemory = dashboard?.memory || memoryQuery.data;
   const runStrategy = () => { if (question.trim().length < 3) return toast.error("Ask a more specific strategy question."); strategyMutation.mutate({ question }); };
   const renderPage = () => {
-    if (location === "/") return <DashboardView data={dashboard} onNavigate={setLocation} />;
+    if (!user && location !== "/") return <PublicDashboardView onSignIn={() => setLocation("/login")} />;
+    if (location === "/") return user ? <DashboardView data={dashboard} onNavigate={navigate} /> : <PublicDashboardView onSignIn={() => setLocation("/login")} />;
     if (location === "/history") return <HistoryView posts={postsQuery.data || []} filters={filters} setFilters={setFilters} onAdd={handleAdd} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} />;
     if (location === "/analytics") return <AnalyticsView analytics={dashboard?.analytics} />;
     if (location === "/strategy") return <StrategyView strategy={strategy} question={question} setQuestion={setQuestion} onRun={runStrategy} running={strategyMutation.isPending} />;
@@ -294,5 +303,5 @@ export default function Home() {
     if (location === "/brand") return <BrandView brand={brandQuery.data || dashboard?.brand} onSave={value => brandMutation.mutate(value)} saving={brandMutation.isPending} />;
     return <SettingsView memory={activeMemory} instagram={instagramQuery.data} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} onConnectInstagram={() => { void connectInstagram(); }} onSyncInstagram={() => instagramSyncMutation.mutate()} syncingInstagram={instagramSyncMutation.isPending} onDisconnectInstagram={() => instagramDisconnectMutation.mutate()} />;
   };
-  return <div className="flex min-h-screen bg-[#f7f8fb]"><Sidebar location={location} setLocation={setLocation} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="flex min-w-0 flex-1 flex-col"><Topbar title={title} setOpen={setSidebarOpen} onAsk={() => setLocation("/strategy")} onImport={() => seedMutation.mutate()} importing={seedMutation.isPending} onSignOut={() => { void signOut(); }} /><main className="container max-w-[1500px] flex-1 py-6 sm:py-8">{dashboardQuery.isLoading && location === "/" ? <div className="space-y-4"><div className="h-28 animate-pulse rounded-2xl bg-[#eceef5]" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-[#eceef5]" />)}</div><div className="h-80 animate-pulse rounded-2xl bg-[#eceef5]" /></div> : renderPage()}</main><footer className="container max-w-[1500px] pb-6 text-xs text-[#a0a3b0]">SocialMind AI · Memory-backed strategy for teams that want to remember what works.</footer></div></div>;
+  return <div className="flex min-h-screen bg-[#f7f8fb]"><Sidebar location={location} onNavigate={navigate} open={sidebarOpen} setOpen={setSidebarOpen} /><div className="flex min-w-0 flex-1 flex-col"><Topbar title={title} setOpen={setSidebarOpen} onAsk={() => navigate("/strategy")} onImport={() => { if (!user) return setLocation("/login"); seedMutation.mutate(); }} importing={seedMutation.isPending} authenticated={Boolean(user)} onSignIn={() => setLocation("/login")} onSignOut={() => { void signOut(); }} /><main className="container max-w-[1500px] flex-1 py-6 sm:py-8">{dashboardQuery.isLoading && location === "/" ? <div className="space-y-4"><div className="h-28 animate-pulse rounded-2xl bg-[#eceef5]" /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1, 2, 3, 4].map(item => <div key={item} className="h-32 animate-pulse rounded-2xl bg-[#eceef5]" />)}</div><div className="h-80 animate-pulse rounded-2xl bg-[#eceef5]" /></div> : renderPage()}</main><footer className="container max-w-[1500px] pb-6 text-xs text-[#a0a3b0]">SocialMind AI · Your private marketing workspace.</footer></div></div>;
 }
